@@ -1,3 +1,9 @@
+import {
+  massRatioToSlider,
+  sliderToMassRatio,
+  SLIDER_MIN,
+  SLIDER_MAX} from "../../utils/SliderUtils";
+
 type PhysicalControlsProps = {
   instructionMessage: string;
   canStartSimulation: boolean;
@@ -27,21 +33,26 @@ function PhysicalControls({
     <div
       style={{
         position: 'absolute',
-        top: 16,
-        left: 16,
+        top: 0,
+        left: 0,
+        right: 0,
         zIndex: 1,
         display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-        alignItems: 'flex-start',
+        flexDirection: 'row', 
+        gap: '20px',        
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '12px 24px',
+        backgroundColor: 'transparent', 
+        borderBottom: '1px solid #ccc',
+        pointerEvents: 'none',
       }}
     >
       <div
         style={{
           padding: '8px 12px',
           backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          border: '1px solid #ccc',
-          borderRadius: 8,
+          borderRadius: 1,
           fontSize: 14,
           fontWeight: 500,
         }}
@@ -49,7 +60,7 @@ function PhysicalControls({
         {instructionMessage}
       </div>
 
-      {canStartSimulation && !isSimulating && (
+      {canStartSimulation && (
         <button
           onClick={onPlay}
           style={{
@@ -61,6 +72,7 @@ function PhysicalControls({
             cursor: 'pointer',
             fontSize: 14,
             fontWeight: 'bold',
+            pointerEvents: 'auto',
           }}
         >
           Play
@@ -80,6 +92,7 @@ function PhysicalControls({
               cursor: 'pointer',
               fontSize: 14,
               fontWeight: 'bold',
+              pointerEvents: 'auto',
             }}
           >
             {isPaused ? 'Riprendi' : 'Pausa'}
@@ -96,6 +109,7 @@ function PhysicalControls({
               cursor: 'pointer',
               fontSize: 14,
               fontWeight: 'bold',
+              pointerEvents: 'auto',
             }}
           >
             Reset
@@ -104,17 +118,20 @@ function PhysicalControls({
       )}
 
       {showDoubleOptions && (
-        <div className="control-group">
+        <div className="control-group" style={{ pointerEvents: 'auto' }}>
           <label style={{ display: 'inline-block', width: '160px' }}>
-            Rapporto Masse: <strong>{massRatio.toFixed(1)}</strong>
+            Rapporto Masse: <strong>{massRatio.toFixed(2)}</strong>
           </label>
           <input 
             type="range" 
-            min="0.1" 
-            max="10" 
-            step="0.1" 
-            value={massRatio} 
-            onChange={(e) => onMassRatioChange(parseFloat(e.target.value))}
+            min= {SLIDER_MIN}
+            max= {SLIDER_MAX}
+            step="1" 
+            value={massRatioToSlider(massRatio)} 
+            onChange={(e) => {
+              const sliderValue = parseFloat(e.target.value);
+              onMassRatioChange(sliderToMassRatio(sliderValue));
+            }}
           />
         </div>
       )}

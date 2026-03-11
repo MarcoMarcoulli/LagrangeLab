@@ -1,5 +1,5 @@
 import type { Point } from '../../types/geometry';
-import { drawPivot, drawRod, drawMass } from '../../utils/DrawUtils';
+import { drawRod, drawMass } from '../../utils/DrawUtils';
 
 export function renderDoublePendulumScene(
   ctx: CanvasRenderingContext2D,
@@ -7,12 +7,13 @@ export function renderDoublePendulumScene(
   mass1: Point | null,
   mass2: Point | null,
   trace: Point[] = [],
-  massRatio: number
+  massRatio: number,
+  color: string
 ): void {
   if (trace.length > 1) {
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(33, 150, 243, 0.4)'; 
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = color; 
+    ctx.lineWidth = 1;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
@@ -23,15 +24,13 @@ export function renderDoublePendulumScene(
     ctx.stroke();
   }
 
-  drawPivot(ctx, pivot);
-
   if (!mass1) return;
 
-  drawRod(ctx, pivot, mass1);
-  drawMass(ctx, mass1);
+  drawRod(ctx, pivot, mass1, color);
+  drawMass(ctx, mass1, color);
 
   if (!mass2) return;
 
-  drawRod(ctx, mass1, mass2);
-  drawMass(ctx, mass2, massRatio);
+  drawRod(ctx, mass1, mass2, color);
+  drawMass(ctx, mass2, color, massRatio);
 }

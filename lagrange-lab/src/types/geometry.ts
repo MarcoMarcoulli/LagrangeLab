@@ -7,3 +7,4 @@ export type Segment = {
   start: Point;
   end: Point;
 };
+

@@ -31,9 +31,7 @@ export function computeDoublePendulumDerivatives(
       2 *
         Math.sin(delta) *
         m2 *
-        (omega2 * omega2 * length2 +
-          omega1 * omega1 * length1 * Math.cos(delta))) /
-    denominator1;
+        (omega2 * omega2 * length2 + omega1 * omega1 * length1 * Math.cos(delta))) / denominator1;
 
   const omega2Dot =
     (2 *

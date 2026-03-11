@@ -28,27 +28,49 @@ import { rungeKutta4Step } from '../simulation/integrator/RungeKutta';
 
 import { isDoubleState } from '../utils/TypeGuards';
 
+import type { PendulumSimulationItem } from '../simulation/PendulumSimulationItem';
+
 const MAX_TRACE_POINTS = 100; 
 
+function computeSubsteps(
+  state: PendulumState,
+  parameters: PendulumParameters
+): number {
+  if (!isDoubleState(state)) {
+    return 1;
+  }
+
+  const derivatives = computeDoublePendulumDerivatives(state, parameters);
+
+  const pressure = Math.max(
+    Math.abs(state.omega1),
+    Math.abs(state.omega2 ?? 0),
+    Math.abs(derivatives.omega1),
+    Math.abs(derivatives.omega2 ?? 0)
+  );
+
+  if (pressure < 5) return 1;
+  if (pressure < 15) return 2;
+  if (pressure < 40) return 4;
+  if (pressure < 100) return 8;
+  return 16;
+}
+
 export function usePendulumSimulation() {
-  const [isSimulating, setIsSimulating] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [pendulumState, setPendulumState] = useState<PendulumState | null>(null);
-  const [pendulumParameters, setPendulumParameters] = useState<PendulumParameters | null>(null);
-  const [trace, setTrace] = useState<Point[]>([]);
+  const [simulations, setSimulations] = useState<PendulumSimulationItem[]>([]);
 
-  const currentPivotRef = useRef<Point | null>(null);
+  const isSimulating = simulations.length > 0;
+
   const animationFrameRef = useRef<number | null>(null);
-  
-  const paramsRef = useRef<PendulumParameters | null>(null);
-  const stateRef = useRef<PendulumState | null>(null);
 
-  useEffect(() => { paramsRef.current = pendulumParameters; }, [pendulumParameters]);
-  useEffect(() => { stateRef.current = pendulumState; }, [pendulumState]);
-
-  const start = useCallback((pivot: Point, mass1: Point, mass2: Point | null, massRatio: number = 1) => {
-    currentPivotRef.current = pivot;
-    
+  const addSimulation = useCallback((
+    pivot: Point,
+    mass1: Point,
+    mass2: Point | null,
+    color: string,
+    massRatio: number = 1
+  ) => {
     let initialState: PendulumState;
     let initialParams: PendulumParameters;
 
@@ -60,99 +82,113 @@ export function usePendulumSimulation() {
       initialParams = buildDoublePendulumParameters(pivot, mass1, mass2, massRatio);
     }
 
-    setPendulumParameters(initialParams);
-    
-    setPendulumState(initialState);
-    setTrace([]);
-    setIsSimulating(true);
-    setIsPaused(false);
+    const newSimulation: PendulumSimulationItem = {
+      id: crypto.randomUUID(),
+      pivot,
+      state: initialState,
+      parameters: initialParams,
+      trace: [],
+      phaseTrace: [],
+      color,
+    };
+
+    setSimulations(prev => [...prev, newSimulation]);
   }, []);
 
   const reset = useCallback(() => {
-    setIsSimulating(false);
+    setSimulations([]);
     setIsPaused(false);
-    setPendulumState(null);
-    setPendulumParameters(null);
-    setTrace([]);
-    currentPivotRef.current = null;
+
     if (animationFrameRef.current !== null) {
       cancelAnimationFrame(animationFrameRef.current);
     }
   }, []);
 
   useEffect(() => {
-    if (!isSimulating || isPaused) return;
+  if (simulations.length === 0 || isPaused) {
+    return;
+  }
 
-    const dt = 0.016; // 60 FPS target
+  const step = () => {
+    setSimulations(prev =>
+      prev.flatMap(sim => {
+        const frameDt = 0.016;
+        const substeps = computeSubsteps(sim.state, sim.parameters);
+        const dt = frameDt / substeps;
 
-    const step = () => {
-      const currentParams = paramsRef.current;
-      const currentState = stateRef.current;
-      const pivot = currentPivotRef.current;
+        let currentState = sim.state;
 
-      if (!currentState || !currentParams || !pivot) {
-        animationFrameRef.current = requestAnimationFrame(step);
-        return;
-      }
+        const phasePoint: Point = {
+          x: currentState.theta1,
+          y: currentState.omega1,
+        };
 
-      let newState: PendulumState;
-      const isDouble = isDoubleState(currentState);
-      if (isDouble) {
-        newState = rungeKutta4Step(
-          currentState,
-          currentParams as PendulumParameters,
-          dt,
-          computeDoublePendulumDerivatives,
-          addDoublePendulumStates,
-          scaleDoublePendulumState
-        );
-      } else {
-        newState = rungeKutta4Step(
-          currentState as PendulumState,
-          currentParams as PendulumParameters,
-          dt,
-          computeSimplePendulumDerivatives,
-          addSimplePendulumStates,
-          scaleSimplePendulumState
-        );
-      }
+        for (let i = 0; i < substeps; i++) {
+          const isCurrentDouble = isDoubleState(currentState);
+          if (isCurrentDouble) {
+            currentState = rungeKutta4Step(
+              currentState,
+              sim.parameters,
+              dt,
+              computeDoublePendulumDerivatives,
+              addDoublePendulumStates,
+              scaleDoublePendulumState
+            );
+          } else {
+            currentState = rungeKutta4Step(
+              currentState,
+              sim.parameters,
+              dt,
+              computeSimplePendulumDerivatives,
+              addSimplePendulumStates,
+              scaleSimplePendulumState
+            );
+          }
+          const exploded =
+              isNaN(currentState.theta1) ||
+              (isCurrentDouble && isNaN(currentState.theta2 ?? NaN));
 
-      const hasExploded = isNaN(newState.theta1) || (isDouble && isNaN(newState.theta2!));
+          if (exploded) {
+            console.error(`Physics exploded for simulation ${sim.id}`);
+            return [];
+          }
+        }
 
-      if (hasExploded)
-      {
-        console.error("physics exploded, NaN angles detected");
-        setIsSimulating(false);
-        return;
-      }
+        const currentPos = isDoubleState(currentState)
+          ? computeMass2Position(sim.pivot, currentState, sim.parameters)
+          : computeSimplePos(sim.pivot, currentState, sim.parameters);
 
-      const currentPos = isDouble
-        ? computeMass2Position(pivot, newState, currentParams)
-        : computeSimplePos(pivot, newState, currentParams);
-
-      setPendulumState(newState);
-      setTrace((prev) => [...prev, currentPos].slice(-MAX_TRACE_POINTS));
-
-      animationFrameRef.current = requestAnimationFrame(step);
-    };
+        return [{
+          ...sim,
+          state: currentState,
+          trace: [...sim.trace, currentPos].slice(-MAX_TRACE_POINTS),
+          phaseTrace: [...sim.phaseTrace, phasePoint].slice(-MAX_TRACE_POINTS),
+        }];
+      })
+    );
 
     animationFrameRef.current = requestAnimationFrame(step);
-
-    return () => {
-      if (animationFrameRef.current !== null) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [isSimulating, isPaused]);
-
-  return {
-    pendulumState,
-    pendulumParameters,
-    trace,
-    isSimulating,
-    isPaused,
-    start,
-    togglePause: () => setIsPaused(p => !p),
-    reset,
   };
+
+  animationFrameRef.current = requestAnimationFrame(step);
+
+  return () => {
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+  };
+}, [simulations.length, isPaused]);
+  
+const togglePause = useCallback(() => {
+  setIsPaused(prev => !prev);
+}, []);
+
+return {
+  simulations,
+  isSimulating,
+  isPaused,
+  addSimulation,
+  togglePause,
+  reset,
+};
 }

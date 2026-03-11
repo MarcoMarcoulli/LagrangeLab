@@ -9,12 +9,40 @@ type CanvasPanelProps = {
   ) => void;
   onCanvasClick?: (point: Point) => void;
   onResize?: (width: number, height: number) => void;
+  onWheel?: (event: React.WheelEvent<HTMLCanvasElement>) => void;
+  onCanvasMouseDown?: (point: Point, event: React.MouseEvent<HTMLCanvasElement>) => void;
+  onCanvasMouseMove?: (point: Point, event: React.MouseEvent<HTMLCanvasElement>) => void;
+  onCanvasMouseUp?: (point: Point, event: React.MouseEvent<HTMLCanvasElement>) => void;
 };
 
-function CanvasPanel({ onDraw, onCanvasClick, onResize }: CanvasPanelProps) {
+function CanvasPanel({ onDraw,
+                      onCanvasClick,
+                      onResize,
+                      onWheel,
+                      onCanvasMouseDown,
+                      onCanvasMouseMove,
+                      onCanvasMouseUp, }: CanvasPanelProps)
+{
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !onWheel) {
+      return;
+    }
+
+    const nativeWheelHandler = (event: WheelEvent) => {
+      event.preventDefault();
+    };
+
+    canvas.addEventListener('wheel', nativeWheelHandler, { passive: false });
+
+    return () => {
+      canvas.removeEventListener('wheel', nativeWheelHandler);
+    };
+  }, [onWheel]);
+  
   useEffect(() => {
     const container = containerRef.current;
     const canvas = canvasRef.current;
@@ -69,20 +97,46 @@ function CanvasPanel({ onDraw, onCanvasClick, onResize }: CanvasPanelProps) {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [onDraw]);
+  }, [onDraw, onResize]);
 
-  const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+  const getCanvasPoint = (
+    event: React.MouseEvent<HTMLCanvasElement>
+  ): Point | null => {
     const canvas = canvasRef.current;
-    if (!canvas || !onCanvasClick) {
-      return;
+    if (!canvas) {
+      return null;
     }
 
     const rect = canvas.getBoundingClientRect();
 
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    return {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    };
+  };
 
-    onCanvasClick({ x, y });
+  const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!onCanvasMouseDown) return;
+    const point = getCanvasPoint(event);
+    if (point) onCanvasMouseDown(point, event);
+  };
+
+  const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!onCanvasMouseMove) return;
+    const point = getCanvasPoint(event);
+    if (point) onCanvasMouseMove(point, event);
+  };
+
+  const handleMouseUp = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!onCanvasMouseUp) return;
+    const point = getCanvasPoint(event);
+    if (point) onCanvasMouseUp(point, event);
+  };
+
+  const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!onCanvasClick) return;
+    const point = getCanvasPoint(event);
+    if (point) onCanvasClick(point);
   };
 
   return (
@@ -97,6 +151,11 @@ function CanvasPanel({ onDraw, onCanvasClick, onResize }: CanvasPanelProps) {
       <canvas
         ref={canvasRef}
         onClick={handleClick}
+        onWheel={onWheel}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
         style={{
           display: 'block',
           width: '100%',
