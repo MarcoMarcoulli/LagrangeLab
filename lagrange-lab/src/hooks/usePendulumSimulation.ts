@@ -32,7 +32,7 @@ import type { PendulumSimulationItem } from '../simulation/PendulumSimulationIte
 
 const TRACE_POINTS_NEWTON = 60; 
 const TRACE_POINTS_HAMILTON = 200;
-const TRACE_POINTS_LAGRANGE = 200;
+const TRACE_POINTS_LAGRANGE = 30;
 
 function computeSubsteps(
   state: PendulumState,
@@ -91,6 +91,7 @@ export function usePendulumSimulation() {
       parameters: initialParams,
       trace: [],
       phaseTrace: [],
+      configurationTrace: [],
       color,
     };
 
@@ -124,6 +125,16 @@ export function usePendulumSimulation() {
           x: currentState.theta1,
           y: currentState.omega1,
         };
+
+        const configurationPoint: Point = isDoubleState(currentState)
+            ? {
+                x: currentState.theta1,
+                y: currentState.theta2 ?? 0,
+              }
+            : {
+                x: currentState.theta1,
+                y: 0,
+              };
 
         for (let i = 0; i < substeps; i++) {
           const isCurrentDouble = isDoubleState(currentState);
@@ -165,6 +176,7 @@ export function usePendulumSimulation() {
           state: currentState,
           trace: [...sim.trace, currentPos].slice(-TRACE_POINTS_NEWTON),
           phaseTrace: [...sim.phaseTrace, phasePoint].slice(-TRACE_POINTS_HAMILTON),
+          configurationTrace: [...sim.configurationTrace, configurationPoint].slice(-TRACE_POINTS_LAGRANGE),
         }];
       })
     );

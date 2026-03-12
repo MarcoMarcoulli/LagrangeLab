@@ -8,5 +8,6 @@ export type PendulumSimulationItem = {
   parameters: PendulumParameters;
   trace: Point[];
   phaseTrace: Point[];
+  configurationTrace: Point[];
   color: string;
 };

@@ -1,33 +1,54 @@
+import { useCallback } from 'react';
+import CanvasPanel from '../canvas/CanvasPanel';
 import type { PendulumSimulationItem } from '../../simulation/PendulumSimulationItem';
+import {
+  drawConfigurationAxes,
+  renderConfigurationSpaceScene,
+} from '../../rendering/abstract/ConfigurationSpaceRenderer';
+
+import { isDoubleState } from '../../utils/TypeGuards';
 
 type ConfigurationSpacePanelProps = {
   simulations: PendulumSimulationItem[];
 };
 
-function ConfigurationSpacePanel({
-  simulations,
-}: ConfigurationSpacePanelProps) {
+function ConfigurationSpacePanel({ simulations }: ConfigurationSpacePanelProps) {
+  const drawScene = useCallback(
+    (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+      ctx.clearRect(0, 0, width, height);
+
+      drawConfigurationAxes(ctx, width, height);
+
+      for (const sim of simulations) {
+        const currentConfigurationPoint = {
+          x: sim.state.theta1,
+          y: isDoubleState(sim.state) ? sim.state.theta2 ?? 0 : 0,
+        };
+        
+        renderConfigurationSpaceScene(
+          ctx,
+          width,
+          height,
+          sim.configurationTrace,
+          currentConfigurationPoint,
+          sim.color
+        );
+      }
+    },
+    [simulations]
+  );
+
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: 18,
-        color: '#444',
-      }}
-    >
-      Spazio delle configurazioni ({simulations.length} simulazioni)
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <CanvasPanel onDraw={drawScene} />
 
       <img
         src="/images/lagrange.png"
-        alt="Isaac Newton"
+        alt="Joseph-Louis Lagrange"
         style={{
           position: 'absolute',
-          right:0,
-          bottom:0,
+          right: 0,
+          bottom: 0,
           width: 150,
           height: 'auto',
           zIndex: 1,
@@ -36,7 +57,6 @@ function ConfigurationSpacePanel({
         }}
       />
     </div>
-    
   );
 }
 
