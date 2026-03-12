@@ -30,7 +30,9 @@ import { isDoubleState } from '../utils/TypeGuards';
 
 import type { PendulumSimulationItem } from '../simulation/PendulumSimulationItem';
 
-const MAX_TRACE_POINTS = 100; 
+const TRACE_POINTS_NEWTON = 60; 
+const TRACE_POINTS_HAMILTON = 200;
+const TRACE_POINTS_LAGRANGE = 200;
 
 function computeSubsteps(
   state: PendulumState,
@@ -161,8 +163,8 @@ export function usePendulumSimulation() {
         return [{
           ...sim,
           state: currentState,
-          trace: [...sim.trace, currentPos].slice(-MAX_TRACE_POINTS),
-          phaseTrace: [...sim.phaseTrace, phasePoint].slice(-MAX_TRACE_POINTS),
+          trace: [...sim.trace, currentPos].slice(-TRACE_POINTS_NEWTON),
+          phaseTrace: [...sim.phaseTrace, phasePoint].slice(-TRACE_POINTS_HAMILTON),
         }];
       })
     );
