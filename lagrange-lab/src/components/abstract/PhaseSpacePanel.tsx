@@ -43,6 +43,20 @@ function PhaseSpacePanel({ simulations }: PhaseSpacePanelProps) {
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <CanvasPanel onDraw={drawScene} />
+      <img
+        src="/images/hamilton.png"
+        alt="Isaac Newton"
+        style={{
+          position: 'absolute',
+          right:0,
+          bottom:0,
+          width: 150,
+          height: 'auto',
+          zIndex: 1,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      />
     </div>
   );
 }

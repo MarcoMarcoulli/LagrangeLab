@@ -20,7 +20,23 @@ function ConfigurationSpacePanel({
       }}
     >
       Spazio delle configurazioni ({simulations.length} simulazioni)
+
+      <img
+        src="/images/lagrange.png"
+        alt="Isaac Newton"
+        style={{
+          position: 'absolute',
+          right:0,
+          bottom:0,
+          width: 150,
+          height: 'auto',
+          zIndex: 1,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      />
     </div>
+    
   );
 }
 
