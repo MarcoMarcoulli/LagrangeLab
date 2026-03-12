@@ -45,7 +45,7 @@ export function drawPhaseAxes(
   ctx.fillText('π', width - 18, height / 2 - 8);
 
   ctx.fillText(`ω max = ${omegaMax}`, 10, 20);
-  ctx.fillText('θ', width - 20, height / 2 - 10);
+  ctx.fillText('θ', width - 20, height / 2 + 15);
   ctx.fillText('ω', width / 2 + 8, 16);
 }
 
