@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import type { Point } from '../../types/geometry';
 
 type CanvasPanelProps = {
@@ -15,22 +15,86 @@ type CanvasPanelProps = {
   onCanvasMouseUp?: (point: Point, event: React.MouseEvent<HTMLCanvasElement>) => void;
 };
 
-function CanvasPanel({ onDraw,
-                      onCanvasClick,
-                      onResize,
-                      onWheel,
-                      onCanvasMouseDown,
-                      onCanvasMouseMove,
-                      onCanvasMouseUp, }: CanvasPanelProps)
-{
+function CanvasPanel({
+  onDraw,
+  onCanvasClick,
+  onResize,
+  onWheel,
+  onCanvasMouseDown,
+  onCanvasMouseMove,
+  onCanvasMouseUp,
+}: CanvasPanelProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  const onDrawRef = useRef(onDraw);
+  const onResizeRef = useRef(onResize);
+
+  useEffect(() => {
+    onDrawRef.current = onDraw;
+  }, [onDraw]);
+
+  useEffect(() => {
+    onResizeRef.current = onResize;
+  }, [onResize]);
+
+  const drawCanvas = useCallback((width: number, height: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+
+    onDrawRef.current?.(ctx, width, height);
+  }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const canvas = canvasRef.current;
+    if (!container || !canvas) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+
+        if (width === 0 || height === 0) continue;
+
+        const dpr = window.devicePixelRatio || 1;
+        const displayWidth = Math.round(width * dpr);
+        const displayHeight = Math.round(height * dpr);
+
+        if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+          canvas.width = displayWidth;
+          canvas.height = displayHeight;
+        }
+
+        onResizeRef.current?.(width, height);
+        drawCanvas(width, height);
+      }
+    });
+
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [drawCanvas]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      drawCanvas(container.clientWidth, container.clientHeight);
+    }
+  }, [onDraw, drawCanvas]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !onWheel) {
-      return;
-    }
+    if (!canvas || !onWheel) return;
 
     const nativeWheelHandler = (event: WheelEvent) => {
       event.preventDefault();
@@ -42,73 +106,12 @@ function CanvasPanel({ onDraw,
       canvas.removeEventListener('wheel', nativeWheelHandler);
     };
   }, [onWheel]);
-  
-  useEffect(() => {
-    const container = containerRef.current;
+
+  const getCanvasPoint = (event: React.MouseEvent<HTMLCanvasElement>): Point | null => {
     const canvas = canvasRef.current;
-
-    if (!container || !canvas) {
-      return;
-    }
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      return;
-    }
-
-    const drawCanvas = () => {
-      const cssWidth = container.clientWidth;
-      const cssHeight = container.clientHeight;
-      const dpr = window.devicePixelRatio || 1;
-
-      const displayWidth = Math.round(cssWidth * dpr);
-      const displayHeight = Math.round(cssHeight * dpr);
-
-      if (canvas.width !== displayWidth) {
-        canvas.width = displayWidth;
-      }
-
-      if (canvas.height !== displayHeight) {
-        canvas.height = displayHeight;
-      }
-
-      canvas.style.width = `${cssWidth}px`;
-      canvas.style.height = `${cssHeight}px`;
-
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.scale(dpr, dpr);
-
-      if (onDraw) {
-        onDraw(ctx, cssWidth, cssHeight);
-      }
-
-      if (onResize) {
-        onResize(cssWidth, cssHeight);
-      }
-    };
-
-    const handleResize = () => {
-      drawCanvas();
-    };
-
-    drawCanvas();
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [onDraw, onResize]);
-
-  const getCanvasPoint = (
-    event: React.MouseEvent<HTMLCanvasElement>
-  ): Point | null => {
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      return null;
-    }
+    if (!canvas) return null;
 
     const rect = canvas.getBoundingClientRect();
-
     return {
       x: event.clientX - rect.left,
       y: event.clientY - rect.top,
@@ -146,6 +149,7 @@ function CanvasPanel({ onDraw,
         width: '100%',
         height: '100%',
         position: 'relative',
+        overflow: 'hidden',
       }}
     >
       <canvas
@@ -160,6 +164,7 @@ function CanvasPanel({ onDraw,
           display: 'block',
           width: '100%',
           height: '100%',
+          touchAction: 'none',
         }}
       />
     </div>

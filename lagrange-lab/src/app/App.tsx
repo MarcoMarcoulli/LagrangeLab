@@ -8,30 +8,35 @@ function App()
   const
   {
     simulations,
-    isSimulating,
+    hasSimulations,
     isPaused,
     addSimulation,
     togglePause,
     reset,
   } = usePendulumSimulation();
   
+  const simulationControls =
+  {
+    hasSimulations,
+    isPaused,
+    addSimulation,
+    togglePause,
+    reset,
+  };
+  
   return (
-    <div className="app-container">
-      <div className="left-panel">
+    <main className="app-container">
+      <section className="left-panel">
         <PhysicalPanel
           simulations={simulations}
-          isSimulating={isSimulating}
-          isPaused={isPaused}
-          addSimulation={addSimulation}
-          togglePause={togglePause}
-          reset={reset}
+          {...simulationControls}
         />
-      </div>
+      </section>
 
-      <div className="right-panel">
+      <section className="right-panel">
         <AbstractPanel simulations={simulations}/>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
 

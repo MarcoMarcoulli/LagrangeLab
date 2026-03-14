@@ -1,8 +1,11 @@
+import './PhysicalPanel.css';
 import { useCallback, useState, useMemo } from 'react';
 import CanvasPanel from '../canvas/CanvasPanel';
 import PhysicalControls from './PhysicalControls';
 import type { PendulumSimulationItem } from '../../simulation/PendulumSimulationItem';
 import type { Point } from '../../types/geometry';
+
+import { useCanvasViewport } from '../../hooks/useCanvasViewport';
 
 import { drawMass, drawPivot, drawRod } from '../../utils/DrawUtils';
 
@@ -18,7 +21,7 @@ import { generateColor } from '../../utils/ColorUtils';
 
 type PhysicalPanelProps = {
   simulations: PendulumSimulationItem[];
-  isSimulating: boolean;
+  hasSimulations: boolean;
   isPaused: boolean;
   addSimulation: (
     pivot: Point,
@@ -33,7 +36,7 @@ type PhysicalPanelProps = {
 
 function PhysicalPanel({
   simulations,
-  isSimulating,
+  hasSimulations,
   isPaused,
   addSimulation,
   togglePause,
@@ -45,111 +48,15 @@ function PhysicalPanel({
   const [mass2, setMass2] = useState<Point | null>(null);
   const [massRatio, setMassRatio] = useState(1);
   const [draftColor, setDraftColor] = useState<string>(() => generateColor());
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [lastDragPoint, setLastDragPoint] = useState<Point | null>(null);
+
+  const { viewport, handleWheel, screenToWorld } = useCanvasViewport();
 
   const pivot: Point = useMemo(() => ({
     x: canvasSize.width / 2,
     y: canvasSize.height * 0.35,
   }), [canvasSize.width, canvasSize.height]);
 
-  const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    setZoom(prev => {
-      const factor = e.deltaY < 0 ? 1.1 : 0.9;
-      const next = prev * factor;
-      return Math.min(5, Math.max(0.2, next));
-    });
-  }, []);
-
-  const handleMouseDown = useCallback((point: Point, event: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!event.shiftKey) {
-      return;
-    }
-
-    setIsDragging(true);
-    setLastDragPoint(point);
-  }, []);
-
-  const handleMouseMove = useCallback((point: Point) => {
-    if (!isDragging || !lastDragPoint) {
-      return;
-    }
-
-    const dx = point.x - lastDragPoint.x;
-    const dy = point.y - lastDragPoint.y;
-
-    setPan(prev => ({
-      x: prev.x + dx,
-      y: prev.y + dy,
-    }));
-
-    setLastDragPoint(point);
-  }, [isDragging, lastDragPoint]);
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-    setLastDragPoint(null);
-  }, []);
-
-  const handleCanvasClick = useCallback((point: Point) => {
-    const worldPoint: Point = {
-      x: pivot.x + (point.x - pivot.x - pan.x) / zoom,
-      y: pivot.y + (point.y - pivot.y - pan.y) / zoom,
-    };
-    if (!mass1) setMass1(worldPoint);
-    else if (!mass2) setMass2(worldPoint);
-  }, [mass1, mass2, pivot, pan, zoom]);
-
-  const drawScene = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    ctx.clearRect(0, 0, width, height);
-
-    ctx.save();
-    ctx.translate(pivot.x + pan.x, pivot.y + pan.y);
-    ctx.scale(zoom, zoom);
-    ctx.translate(-pivot.x, -pivot.y);
-
-    drawPivot(ctx, pivot);
-
-    for (const simulation of simulations) {
-      const { state, parameters, trace, color } = simulation;
-
-      if (isDoubleState(state)) {
-        const m1 = computeMass1Position(pivot, state, parameters);
-        const m2 = computeMass2Position(pivot, state, parameters);
-        renderDoublePendulumScene(
-          ctx,
-          pivot,
-          m1,
-          m2,
-          trace,
-          parameters.massRatio ?? 1,
-          color
-        );
-      } else {
-        const mPos = computeMass1Position(pivot, state, parameters);
-        renderSimplePendulumScene(ctx, pivot, mPos, trace, color);
-      }
-    }
-
-    if (mass1) {
-      drawRod(ctx, pivot, mass1, draftColor);
-      drawMass(ctx, mass1, draftColor);
-    }
-
-    if (mass1 && mass2) {
-      drawRod(ctx, mass1, mass2, draftColor);
-      drawMass(ctx, mass2, draftColor, massRatio);
-    }
-
-    ctx.restore();
-  }, [simulations, pivot, mass1, mass2, massRatio, draftColor, zoom, pan]);
-
-  const getInstructionMessage = () => {
+  const instructionMessage = useMemo(() => {
     if (!mass1) {
       return isPaused
         ? 'Simulazioni in pausa. Clicca per posizionare la prima massa.'
@@ -161,65 +68,122 @@ function PhysicalPanel({
     }
 
     return 'Premi Play per aggiungere il doppio pendolo.';
-  };
+  }, [mass1, mass2, isPaused]);
+
+  const resetDraft = useCallback(() => {
+    setMass1(null);
+    setMass2(null);
+    setMassRatio(1);
+    setDraftColor(generateColor());
+  }, []);
+
+  const handleCanvasClick = useCallback((point: Point) => {
+    const worldPoint = screenToWorld(point);
+    if (!mass1)
+    {
+      setMass1(worldPoint);
+    }
+    else if (!mass2)
+    {
+      setMass2(worldPoint);
+    }
+  }, [mass1, mass2, screenToWorld]);
+
+  const drawScene = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    ctx.clearRect(0, 0, width, height);
+
+    ctx.save();
+    ctx.translate(viewport.offsetX, viewport.offsetY);
+    ctx.scale(viewport.scale, viewport.scale);
+
+    drawPivot(ctx, pivot);
+
+    for (const simulation of simulations)
+    {
+      const { state, parameters, trace, color } = simulation;
+
+      if (isDoubleState(state)) 
+      {
+        const m1 = computeMass1Position(pivot, state, parameters);
+        const m2 = computeMass2Position(pivot, state, parameters);
+        renderDoublePendulumScene(
+          ctx,
+          pivot,
+          m1,
+          m2,
+          trace,
+          parameters.massRatio ?? 1,
+          color
+        );
+      }
+      else
+      {
+        const mPos = computeMass1Position(pivot, state, parameters);
+        renderSimplePendulumScene(ctx, pivot, mPos, trace, color);
+      }
+    }
+
+    if (mass1)
+    {
+      drawRod(ctx, pivot, mass1, draftColor);
+      drawMass(ctx, mass1, draftColor);
+    }
+
+    if (mass1 && mass2)
+    {
+      drawRod(ctx, mass1, mass2, draftColor);
+      drawMass(ctx, mass2, draftColor, massRatio);
+    }
+
+    ctx.restore();
+  }, [simulations, pivot, mass1, mass2, massRatio, draftColor, viewport]);
+
+  const handlePlay = useCallback(() => {
+    if (!mass1) {
+      return;
+    }
+
+    addSimulation(pivot, mass1, mass2, draftColor, massRatio);
+    resetDraft();
+  }, [mass1, mass2, draftColor, massRatio, pivot, addSimulation, resetDraft]);
+
+  const handleReset = useCallback(() => {
+    reset();
+    resetDraft();
+  }, [reset, resetDraft]);
+
+  const handleResize = useCallback((w: number, h: number) => {
+    setCanvasSize(prev =>
+      prev.width === w && prev.height === h ? prev : { width: w, height: h }
+    );
+  }, []);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div className="physical-panel-container">
       <PhysicalControls
-        instructionMessage={getInstructionMessage()}
+        instructionMessage={instructionMessage}
         canStartSimulation={!!mass1}
-        isSimulating={isSimulating}
+        hasSimulations={hasSimulations}
         isPaused={isPaused}
         massRatio={massRatio}
         onMassRatioChange={setMassRatio}
         showDoubleOptions={!!mass2}
-        onPlay={() => {
-          if (!mass1) return;
-
-          addSimulation(pivot, mass1, mass2, draftColor, massRatio);
-
-          setMass1(null);
-          setMass2(null);
-          setMassRatio(1);
-          setDraftColor(generateColor());
-        }}
+        onPlay={handlePlay}
         onTogglePause={togglePause}
-        onReset={() => {
-          reset();
-          setMass1(null);
-          setMass2(null);
-          setMassRatio(1);
-          setDraftColor(generateColor());
-        }}
+        onReset={handleReset}
       />
 
       <CanvasPanel
         onDraw={drawScene}
         onCanvasClick={handleCanvasClick}
         onWheel={handleWheel}
-        onCanvasMouseDown={handleMouseDown}
-        onCanvasMouseMove={handleMouseMove}
-        onCanvasMouseUp={handleMouseUp}
-        onResize={(w, h) => {
-          setCanvasSize(prev =>
-            prev.width === w && prev.height === h ? prev : { width: w, height: h }
-          );
-        }}
+        onResize={handleResize}
       />
 
       <img
         src="/images/newton.png"
         alt="Isaac Newton"
-        style={{
-          position: 'absolute',
-          left:0,
-          bottom:0,
-          width: 150,
-          height: 'auto',
-          zIndex: 1,
-          pointerEvents: 'none',
-          userSelect: 'none',
-        }}
+        className="physical-panel-newton-image"
       />
     </div>
   );

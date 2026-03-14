@@ -8,7 +8,8 @@ export function computeMass1Position(
   state: PendulumState, 
   parameters: PendulumParameters
 ): Point {
-  return computePolarToCartesian(pivot, parameters.length1, state.theta1);
+  const theta1 = state[0];
+  return computePolarToCartesian(pivot, parameters.length1, theta1);
 }
 
 export function buildBaseParameters(pivot: Point, mass1: Point, gravity = SCALED_GRAVITY) {
@@ -19,8 +20,8 @@ export function buildBaseParameters(pivot: Point, mass1: Point, gravity = SCALED
 }
 
 export function buildBaseInitialState(pivot: Point, mass1: Point) {
-  return {
-    theta1: computeAngle(pivot, mass1),
-    omega1: 0,
-  };
+  return new Float64Array([
+    computeAngle(pivot, mass1),
+    0 
+  ]);
 }

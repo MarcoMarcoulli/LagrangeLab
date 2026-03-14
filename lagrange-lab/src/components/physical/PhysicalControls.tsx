@@ -7,7 +7,7 @@ import {
 type PhysicalControlsProps = {
   instructionMessage: string;
   canStartSimulation: boolean;
-  isSimulating: boolean;
+  hasSimulations: boolean;
   isPaused: boolean;
   onPlay: () => void;
   onTogglePause: () => void;
@@ -20,7 +20,7 @@ type PhysicalControlsProps = {
 function PhysicalControls({
   instructionMessage,
   canStartSimulation,
-  isSimulating,
+  hasSimulations,
   isPaused,
   onPlay,
   onTogglePause,
@@ -55,6 +55,7 @@ function PhysicalControls({
           borderRadius: 1,
           fontSize: 14,
           fontWeight: 500,
+          color: 'black',
         }}
       >
         {instructionMessage}
@@ -79,7 +80,7 @@ function PhysicalControls({
         </button>
       )}
 
-      {isSimulating && (
+      {hasSimulations && (
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             onClick={onTogglePause}

@@ -25,7 +25,8 @@ export function rungeKutta4Step<TState, TParameters>(
   computeDerivatives: DerivativeFunction<TState, TParameters>,
   add: AddFunction<TState>,
   scale: ScaleFunction<TState>
-): TState {
+): TState
+{
   const k1 = computeDerivatives(state, parameters);
 
   const k2 = computeDerivatives(

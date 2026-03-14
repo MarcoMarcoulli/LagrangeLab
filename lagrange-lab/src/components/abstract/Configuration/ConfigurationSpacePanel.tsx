@@ -1,12 +1,13 @@
+import './ConfigurationSpacePanel.css'
 import { useCallback } from 'react';
-import CanvasPanel from '../canvas/CanvasPanel';
-import type { PendulumSimulationItem } from '../../simulation/PendulumSimulationItem';
+import CanvasPanel from '../../canvas/CanvasPanel';
+import type { PendulumSimulationItem } from '../../../simulation/PendulumSimulationItem';
 import {
   drawConfigurationAxes,
   renderConfigurationSpaceScene,
-} from '../../rendering/abstract/ConfigurationSpaceRenderer';
+} from '../../../rendering/abstract/ConfigurationSpaceRenderer';
 
-import { isDoubleState } from '../../utils/TypeGuards';
+import { isDoubleState } from '../../../utils/TypeGuards';
 
 type ConfigurationSpacePanelProps = {
   simulations: PendulumSimulationItem[];
@@ -20,9 +21,11 @@ function ConfigurationSpacePanel({ simulations }: ConfigurationSpacePanelProps) 
       drawConfigurationAxes(ctx, width, height);
 
       for (const sim of simulations) {
+        const theta1 = sim.state[0];
+        const theta2 = sim.state[2];
         const currentConfigurationPoint = {
-          x: sim.state.theta1,
-          y: isDoubleState(sim.state) ? sim.state.theta2 ?? 0 : 0,
+          x: theta1,
+          y: isDoubleState(sim.state) ? theta2 : 0,
         };
         
         renderConfigurationSpaceScene(
@@ -39,22 +42,13 @@ function ConfigurationSpacePanel({ simulations }: ConfigurationSpacePanelProps) 
   );
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div className="configuration-space-container">
       <CanvasPanel onDraw={drawScene} />
 
       <img
         src="/images/lagrange.png"
         alt="Joseph-Louis Lagrange"
-        style={{
-          position: 'absolute',
-          right: 0,
-          bottom: 0,
-          width: 150,
-          height: 'auto',
-          zIndex: 1,
-          pointerEvents: 'none',
-          userSelect: 'none',
-        }}
+        className="configuration-space-image"
       />
     </div>
   );

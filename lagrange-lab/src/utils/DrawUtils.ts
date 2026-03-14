@@ -4,7 +4,7 @@ export function drawPivot(ctx: CanvasRenderingContext2D, pivot: Point): void
 {
   ctx.beginPath();
   ctx.arc(pivot.x, pivot.y, 6, 0, Math.PI * 2);
-  ctx.fillStyle = 'black';
+  ctx.fillStyle = 'white';
   ctx.fill();
 }
 

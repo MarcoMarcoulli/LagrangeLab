@@ -1,11 +1,12 @@
+import './PhaseSpacePanel.css'
 import { useCallback } from 'react';
-import CanvasPanel from '../canvas/CanvasPanel';
-import type { PendulumSimulationItem } from '../../simulation/PendulumSimulationItem';
-import { isDoubleState } from '../../utils/TypeGuards';
+import CanvasPanel from '../../canvas/CanvasPanel';
+import type { PendulumSimulationItem } from '../../../simulation/PendulumSimulationItem';
+import { isDoubleState } from '../../../utils/TypeGuards';
 import {
   drawPhaseAxes,
   renderPhaseSpaceScene,
-} from '../../rendering/abstract/PhaseSpaceRenderer';
+} from '../../../rendering/abstract/PhaseSpaceRenderer';
 
 type PhaseSpacePanelProps = {
   simulations: PendulumSimulationItem[];
@@ -23,15 +24,16 @@ function PhaseSpacePanel({ simulations }: PhaseSpacePanelProps) {
       drawPhaseAxes(ctx, width, height, OMEGA_MAX);
 
       for (const sim of simpleSimulations) {
+        const theta1 = sim.state[0];
+        const omega1 = sim.state[1];
+        const currentPhasePoint = { x: theta1, y: omega1, };
+
         renderPhaseSpaceScene(
           ctx,
           width,
           height,
           sim.phaseTrace,
-          {
-            x: sim.state.theta1,
-            y: sim.state.omega1,
-          },
+          currentPhasePoint,
           sim.color,
           OMEGA_MAX
         );
@@ -41,21 +43,12 @@ function PhaseSpacePanel({ simulations }: PhaseSpacePanelProps) {
   );
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div className="configuration-space-container">
       <CanvasPanel onDraw={drawScene} />
       <img
         src="/images/hamilton.png"
-        alt="Isaac Newton"
-        style={{
-          position: 'absolute',
-          right:0,
-          bottom:0,
-          width: 150,
-          height: 'auto',
-          zIndex: 1,
-          pointerEvents: 'none',
-          userSelect: 'none',
-        }}
+        alt="William Rowan Hamilton"
+        className="phase-space-image"
       />
     </div>
   );
