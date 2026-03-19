@@ -1,23 +1,61 @@
 import './ConfigurationSpacePanel.css'
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import CanvasPanel from '../../canvas/CanvasPanel';
 import type { PendulumSimulationItem } from '../../../simulation/PendulumSimulationItem';
 import {
   drawConfigurationAxes,
   renderConfigurationSpaceScene,
+  buildContourSegments,
+  drawContourSegments,
 } from '../../../rendering/abstract/ConfigurationSpaceRenderer';
 
 import { isDoubleState } from '../../../utils/TypeGuards';
+
+import { computeDoublePendulumPotential } from '../../../simulation/models/DoublePendulum';
+
+import { buildContourLevels } from '../../../utils/ContourLevels';
+
+import { computeDoublePendulumTotalEnergy } from '../../../simulation/models/DoublePendulum';
 
 type ConfigurationSpacePanelProps = {
   simulations: PendulumSimulationItem[];
 };
 
 function ConfigurationSpacePanel({ simulations }: ConfigurationSpacePanelProps) {
+
+  const doublePendulumSimulations = simulations.filter(sim => isDoubleState(sim.state));
+
+  const firstDoubleSim = doublePendulumSimulations.length === 1 ? doublePendulumSimulations[0] : null;
+
+  const totalEnergy = firstDoubleSim
+    ? computeDoublePendulumTotalEnergy(firstDoubleSim.state, firstDoubleSim.parameters)
+    : null;
+  
+  const contourSegments = useMemo(() => {
+    if (!firstDoubleSim || totalEnergy === null) {
+      return [];
+    }
+
+    const kineticMarginField = (theta1: number, theta2: number) =>
+      totalEnergy - computeDoublePendulumPotential(theta1, theta2, firstDoubleSim.parameters);
+
+    const levels = buildContourLevels(kineticMarginField, 80, 16);
+
+    return buildContourSegments(kineticMarginField, levels, 60);
+  }, [firstDoubleSim?.parameters.length1,
+  firstDoubleSim?.parameters.length2,
+  firstDoubleSim?.parameters.massRatio,
+  firstDoubleSim?.parameters.gravity, totalEnergy,]);
+
   const drawScene = useCallback(
     (ctx: CanvasRenderingContext2D, width: number, height: number) => {
       ctx.clearRect(0, 0, width, height);
 
+      if (contourSegments.length > 0)
+      {
+        drawContourSegments(ctx, width, height, contourSegments);
+      }
+      
       drawConfigurationAxes(ctx, width, height);
 
       for (const sim of simulations) {
@@ -38,7 +76,7 @@ function ConfigurationSpacePanel({ simulations }: ConfigurationSpacePanelProps) 
         );
       }
     },
-    [simulations]
+    [simulations, contourSegments]
   );
 
   return (

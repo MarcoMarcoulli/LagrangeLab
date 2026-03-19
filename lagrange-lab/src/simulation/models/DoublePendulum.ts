@@ -73,3 +73,55 @@ export function computeMass2Position(pivot: Point, state: PendulumState, paramet
   const theta2 = state[2];
   return computePolarToCartesian(m1Pos, parameters.length2 ?? 0, theta2);
 }
+
+export function computeDoublePendulumPotential(
+  theta1: number,
+  theta2: number,
+  parameters: PendulumParameters
+): number
+{
+  const { length1, gravity, massRatio } = parameters;
+  const length2 = parameters.length2 ?? 0;
+
+  const m1 = 1;
+  const m2 = massRatio ?? 0;
+
+  return (
+    -(m1 + m2) * gravity * length1 * Math.cos(theta1) -
+    m2 * gravity * length2 * Math.cos(theta2)
+  );
+}
+
+export function computeDoublePendulumKineticEnergy(
+  state: PendulumState,
+  parameters: PendulumParameters
+): number
+{
+  const theta1 = state[0];
+  const omega1 = state[1];
+  const theta2 = state[2];
+  const omega2 = state[3];
+
+  const { length1, massRatio } = parameters;
+  const length2 = parameters.length2 ?? 0;
+
+  const m1 = 1;
+  const m2 = massRatio ?? 0;
+
+  return (
+    0.5 * (m1 + m2) * length1 * length1 * omega1 * omega1 +
+    0.5 * m2 * length2 * length2 * omega2 * omega2 +
+    m2 * length1 * length2 * omega1 * omega2 * Math.cos(theta1 - theta2)
+  );
+}
+
+export function computeDoublePendulumTotalEnergy(
+  state: PendulumState,
+  parameters: PendulumParameters
+): number
+{
+  return (
+    computeDoublePendulumKineticEnergy(state, parameters) +
+    computeDoublePendulumPotential(state[0], state[2], parameters)
+  );
+}

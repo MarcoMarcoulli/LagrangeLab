@@ -23,7 +23,7 @@ export function drawConfigurationAxes(
   width: number,
   height: number
 ): void {
-  ctx.strokeStyle = '#888';
+  ctx.strokeStyle = '#ffffffff';
   ctx.lineWidth = 1;
 
   ctx.beginPath();
@@ -36,7 +36,7 @@ export function drawConfigurationAxes(
   ctx.lineTo(width / 2, height);
   ctx.stroke();
 
-  ctx.fillStyle = '#444';
+  ctx.fillStyle = '#f8f4f4ff';
   ctx.font = '14px sans-serif';
 
   ctx.fillText('-π', 8, height / 2 - 8);
@@ -47,7 +47,7 @@ export function drawConfigurationAxes(
   ctx.fillText('π', width / 2 + 8, 16);
 
   ctx.fillText('θ₁', width - 24, height / 2 + 16);
-  ctx.fillText('θ₂', width / 2 + 8, 16);
+  ctx.fillText('θ₂', width / 2 - 10, 16);
 }
 
 export function renderConfigurationSpaceScene(
@@ -114,4 +114,90 @@ export function renderConfigurationSpaceScene(
   ctx.fillStyle = color;
   ctx.arc(current.x, current.y, 6, 0, TWO_PI);
   ctx.fill();
+}
+
+type ScalarFieldFunction = (theta1: number, theta2: number) => number;
+
+type ContourSegment = {
+  start: Point;
+  end: Point;
+};
+
+export function buildContourSegments(
+  scalarField: ScalarFieldFunction,
+  levels: number[],
+  resolution = 50
+): ContourSegment[] {
+  const thetaStep = TWO_PI / resolution;
+  const segments: ContourSegment[] = [];
+
+  for (const level of levels) {
+    for (let i = 0; i < resolution; i++) {
+      for (let j = 0; j < resolution; j++) {
+        const theta1a = -Math.PI + i * thetaStep;
+        const theta1b = theta1a + thetaStep;
+        const theta2a = -Math.PI + j * thetaStep;
+        const theta2b = theta2a + thetaStep;
+
+        const v00 = scalarField(theta1a, theta2a);
+        const v10 = scalarField(theta1b, theta2a);
+        const v11 = scalarField(theta1b, theta2b);
+        const v01 = scalarField(theta1a, theta2b);
+
+        const points: Point[] = [];
+
+        if ((v00 - level) * (v10 - level) < 0) {
+          const t = (level - v00) / (v10 - v00);
+          points.push({ x: theta1a + t * (theta1b - theta1a), y: theta2a });
+        }
+
+        if ((v10 - level) * (v11 - level) < 0) {
+          const t = (level - v10) / (v11 - v10);
+          points.push({ x: theta1b, y: theta2a + t * (theta2b - theta2a) });
+        }
+
+        if ((v11 - level) * (v01 - level) < 0) {
+          const t = (level - v11) / (v01 - v11);
+          points.push({ x: theta1b + t * (theta1a - theta1b), y: theta2b });
+        }
+
+        if ((v01 - level) * (v00 - level) < 0) {
+          const t = (level - v01) / (v00 - v01);
+          points.push({ x: theta1a, y: theta2b + t * (theta2a - theta2b) });
+        }
+
+        if (points.length === 2) {
+          segments.push({
+            start: points[0],
+            end: points[1],
+          });
+        }
+      }
+    }
+  }
+
+  return segments;
+}
+
+export function drawContourSegments(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  segments: ContourSegment[]
+): void {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+
+  for (const segment of segments) {
+    const start = mapConfigurationToCanvas(segment.start.x, segment.start.y, width, height);
+    const end = mapConfigurationToCanvas(segment.end.x, segment.end.y, width, height);
+
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(end.x, end.y);
+  }
+
+  ctx.stroke();
+  ctx.restore();
 }
