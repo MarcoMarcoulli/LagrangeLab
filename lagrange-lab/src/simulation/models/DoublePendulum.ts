@@ -27,27 +27,18 @@ export function computeDoublePendulumDerivatives(
   const omega1Sq = omega1 * omega1;
   const omega2Sq = omega2 * omega2;
 
-  const cos2Delta = Math.cos(2 * delta);
+  const f1 = - m2 * length2 * omega2Sq * sinDelta - m1_plus_m2 * gravity * Math.sin(theta1);
+  const f2 = length1 * omega1Sq * sinDelta - gravity * Math.sin(theta2);
 
-  const baseDenominator = 2 * m1 + m2 - m2 * cos2Delta;
+  const Denominator = m1 + m2 * Math.pow(sinDelta, 2);
 
-  const denominator1 = length1 * baseDenominator;
-  const denominator2 = length2 * baseDenominator;
+  const denominator1 = length1 * Denominator;
+  const denominator2 = length2 * Denominator;
+  const numerator1 = f1 - m2 * cosDelta * f2;
+  const numerator2 = m1_plus_m2 * f2 - cosDelta * f1;
 
-  const omega1Dot =
-    (-gravity * (2 * m1 + m2) * Math.sin(theta1) -
-      m2 * gravity * Math.sin(theta1 - 2 * theta2) -
-      2 * sinDelta *
-        m2 *
-        (omega2Sq * length2 + omega1Sq * length1 * cosDelta)) / denominator1;
-
-  const omega2Dot =
-    (2 *
-      sinDelta *
-      (omega1Sq * length1 * m1_plus_m2 +
-        gravity * m1_plus_m2 * Math.cos(theta1) +
-        omega2Sq * length2 * m2 * cosDelta)) /
-    denominator2;
+  const omega1Dot = numerator1 / denominator1;
+  const omega2Dot = numerator2 / denominator2
 
   return new Float64Array([omega1, omega1Dot, omega2, omega2Dot]);
 }
