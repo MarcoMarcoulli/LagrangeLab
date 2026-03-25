@@ -1,13 +1,13 @@
-import './ConfigurationSpacePanel.css'
+import './LagrangePanel.css'
 import { useCallback, useMemo } from 'react';
 import CanvasPanel from '../../canvas/CanvasPanel';
 import type { PendulumSimulationItem } from '../../../simulation/PendulumSimulationItem';
 import {
   drawConfigurationAxes,
-  renderConfigurationSpaceScene,
+  renderLagrangeScene,
   buildContourSegments,
   drawContourSegments,
-} from '../../../rendering/abstract/ConfigurationSpaceRenderer';
+} from '../../../rendering/abstract/LagrangeRenderer';
 
 import { isDoubleState } from '../../../utils/TypeGuards';
 
@@ -17,11 +17,11 @@ import { buildContourLevels } from '../../../utils/ContourLevels';
 
 import { computeDoublePendulumTotalEnergy } from '../../../simulation/models/DoublePendulum';
 
-type ConfigurationSpacePanelProps = {
+type LagrangePanelProps = {
   simulations: PendulumSimulationItem[];
 };
 
-function ConfigurationSpacePanel({ simulations }: ConfigurationSpacePanelProps) {
+function LagrangePanel({ simulations }: LagrangePanelProps) {
 
   const doublePendulumSimulations = simulations.filter(sim => isDoubleState(sim.state));
 
@@ -66,7 +66,7 @@ function ConfigurationSpacePanel({ simulations }: ConfigurationSpacePanelProps) 
           y: isDoubleState(sim.state) ? theta2 : 0,
         };
         
-        renderConfigurationSpaceScene(
+        renderLagrangeScene(
           ctx,
           width,
           height,
@@ -80,16 +80,16 @@ function ConfigurationSpacePanel({ simulations }: ConfigurationSpacePanelProps) 
   );
 
   return (
-    <div className="configuration-space-container">
+    <div className="lagrange-container">
       <CanvasPanel onDraw={drawScene} />
 
       <img
         src="/images/lagrange.png"
         alt="Joseph-Louis Lagrange"
-        className="configuration-space-image"
+        className="lagrange-image"
       />
     </div>
   );
 }
 
-export default ConfigurationSpacePanel;
+export default LagrangePanel;

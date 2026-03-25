@@ -50,7 +50,7 @@ export function drawConfigurationAxes(
   ctx.fillText('θ₂', width / 2 - 10, 16);
 }
 
-export function renderConfigurationSpaceScene(
+export function renderLagrangeScene(
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,

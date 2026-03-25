@@ -25,7 +25,7 @@ export function drawPhaseAxes(
   height: number,
   omegaMax: number
 ): void {
-  ctx.strokeStyle = '#888';
+  ctx.strokeStyle = '#f4efefff';
   ctx.lineWidth = 1;
 
   ctx.beginPath();
@@ -38,41 +38,42 @@ export function drawPhaseAxes(
   ctx.lineTo(width / 2, height);
   ctx.stroke();
 
-  ctx.fillStyle = '#444';
+  ctx.fillStyle = '#f6f3f3ff';
   ctx.font = '14px sans-serif';
   ctx.fillText('-π', 8, height / 2 - 8);
   ctx.fillText('0', width / 2 + 6, height / 2 - 8);
   ctx.fillText('π', width - 18, height / 2 - 8);
 
-  ctx.fillText(`ω max = ${omegaMax}`, 10, 20);
+  ctx.fillText(`ω max = ${omegaMax.toFixed(1)}`, 10, 20);
   ctx.fillText('θ', width - 20, height / 2 + 15);
   ctx.fillText('ω', width / 2 + 8, 16);
 }
 
-export function renderPhaseSpaceScene(
+export function renderHamiltonScene(
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
   phaseTrace: Point[],
   currentPhasePoint: Point,
   color: string,
-  omegaMax: number
+  omegaMax: number,
+  isMass2: boolean = false
 ): void {
   if (phaseTrace.length > 1) {
     ctx.beginPath();
     ctx.strokeStyle = color;
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = isMass2 ? 1 : 2;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
-    const first = mapPhaseToCanvas(
+    let prevPoint = mapPhaseToCanvas(
       wrapAngle(phaseTrace[0].x),
       phaseTrace[0].y,
       width,
       height,
       omegaMax
     );
-    ctx.moveTo(first.x, first.y);
+    ctx.moveTo(prevPoint.x, prevPoint.y);
 
     for (let i = 1; i < phaseTrace.length; i++) {
       const p = mapPhaseToCanvas(
@@ -82,7 +83,14 @@ export function renderPhaseSpaceScene(
         height,
         omegaMax
       );
-      ctx.lineTo(p.x, p.y);
+
+      if (Math.abs(p.x - prevPoint.x) > width / 2) {
+        ctx.moveTo(p.x, p.y);
+      } else {
+        ctx.lineTo(p.x, p.y);
+      }
+      
+      prevPoint = p;
     }
 
     ctx.stroke();
@@ -97,7 +105,17 @@ export function renderPhaseSpaceScene(
   );
 
   ctx.beginPath();
-  ctx.fillStyle = color;
   ctx.arc(current.x, current.y, 6, 0, 2 * Math.PI);
-  ctx.fill();
+  
+  if(isMass2)
+  {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.stroke(); 
+  }
+  else
+  {
+    ctx.fillStyle = color;
+    ctx.fill(); 
+  }
 }

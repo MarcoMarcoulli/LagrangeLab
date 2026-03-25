@@ -18,7 +18,8 @@ export function renderDoublePendulumScene(
     ctx.lineCap = 'round';
 
     ctx.moveTo(trace[0].x, trace[0].y);
-    for (let i = 1; i < trace.length; i++) {
+    for (let i = 1; i < trace.length; i++)
+    {
       ctx.lineTo(trace[i].x, trace[i].y);
     }
     ctx.stroke();

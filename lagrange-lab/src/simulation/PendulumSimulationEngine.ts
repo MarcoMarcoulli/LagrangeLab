@@ -21,7 +21,7 @@ import { rungeKutta4Step } from './integrator/RungeKutta';
 import { isDoubleState } from '../utils/TypeGuards';
 
 const TRACE_POINTS_NEWTON = 60;
-const TRACE_POINTS_HAMILTON = 200;
+const TRACE_POINTS_HAMILTON = 30;
 const TRACE_POINTS_LAGRANGE = 30;
 const FRAME_DT = 0.016;
 
@@ -144,6 +144,7 @@ export function buildSimulation(
     parameters: initialParams,
     trace: [],
     phaseTrace: [],
+    phaseTrace2: mass2 ? [] : undefined,
     configurationTrace: [],
     color,
   };
@@ -159,6 +160,11 @@ export function stepSimulation(
   let currentState = sim.state;
 
   const phasePoint: Point = buildPhasePoint(currentState);
+
+  const phasePoint2: Point | undefined = isDoubleState(currentState) 
+    ? { x: currentState[2], y: currentState[3] } 
+    : undefined;
+  
   const configurationPoint: Point = buildConfigurationPoint(currentState);
 
   for (let i = 0; i < substeps; i++) {
@@ -187,6 +193,9 @@ export function stepSimulation(
     state: currentState,
     trace: [...sim.trace, currentPos].slice(-TRACE_POINTS_NEWTON),
     phaseTrace: [...sim.phaseTrace, phasePoint].slice(-TRACE_POINTS_HAMILTON),
+    phaseTrace2: (phasePoint2 && sim.phaseTrace2) 
+        ? [...sim.phaseTrace2, phasePoint2].slice(-TRACE_POINTS_HAMILTON) 
+        : sim.phaseTrace2,
     configurationTrace: [...sim.configurationTrace, configurationPoint].slice(-TRACE_POINTS_LAGRANGE),
   };
 }

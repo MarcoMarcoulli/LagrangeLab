@@ -1,4 +1,4 @@
-import './PhysicalPanel.css';
+import './NewtonPanel.css';
 import { useCallback, useState, useMemo } from 'react';
 import CanvasPanel from '../canvas/CanvasPanel';
 import PhysicalControls from './PhysicalControls';
@@ -19,7 +19,7 @@ import { isDoubleState } from '../../utils/TypeGuards';
 
 import { generateColor } from '../../utils/ColorUtils';
 
-type PhysicalPanelProps = {
+type NewtonPanelProps = {
   simulations: PendulumSimulationItem[];
   hasSimulations: boolean;
   isPaused: boolean;
@@ -34,14 +34,14 @@ type PhysicalPanelProps = {
   reset: () => void;
 };
 
-function PhysicalPanel({
+function NewtonPanel({
   simulations,
   hasSimulations,
   isPaused,
   addSimulation,
   togglePause,
   reset,
-}: PhysicalPanelProps)
+}: NewtonPanelProps)
 {
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
   const [mass1, setMass1] = useState<Point | null>(null);
@@ -189,4 +189,4 @@ function PhysicalPanel({
   );
 }
 
-export default PhysicalPanel;
+export default NewtonPanel;

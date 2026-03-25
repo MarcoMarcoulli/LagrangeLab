@@ -2,8 +2,8 @@ import './AbstractPanel.css'
 import { useState } from 'react';
 import type { PendulumSimulationItem } from '../../simulation/PendulumSimulationItem';
 
-import ConfigurationSpacePanel from './Configuration/ConfigurationSpacePanel';
-import PhaseSpacePanel from './Phase/PhaseSpacePanel';
+import LagrangePanel from './Lagrange/LagrangePanel';
+import HamiltonPanel from './Hamilton/HamiltonPanel';
 
 type AbstractViewMode = 'configuration' | 'phase';
 
@@ -32,8 +32,8 @@ function AbstractPanel({ simulations }: AbstractPanelProps) {
       </button>
     </div>
 
-      {viewMode === 'configuration' ? (<ConfigurationSpacePanel simulations={simulations} />) :
-      (<PhaseSpacePanel simulations={simulations}/>)}
+      {viewMode === 'configuration' ? (<LagrangePanel simulations={simulations} />) :
+      (<HamiltonPanel simulations={simulations}/>)}
     </div>
   );
 }

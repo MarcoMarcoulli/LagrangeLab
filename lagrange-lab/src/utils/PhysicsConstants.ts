@@ -1,3 +1,3 @@
 export const REAL_GRAVITY = 9.81;
-export const PIXELS_PER_METER = 1000;
+export const PIXELS_PER_METER = 700;
 export const SCALED_GRAVITY = REAL_GRAVITY * PIXELS_PER_METER;
