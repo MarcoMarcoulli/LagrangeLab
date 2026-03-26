@@ -2,7 +2,7 @@ import {
   massRatioToSlider,
   sliderToMassRatio,
   SLIDER_MIN,
-  SLIDER_MAX} from "../../utils/SliderUtils";
+  SLIDER_MAX} from "../../utils/Draw/SliderUtils";
 
 type PhysicalControlsProps = {
   instructionMessage: string;

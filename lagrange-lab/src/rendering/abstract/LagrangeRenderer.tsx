@@ -54,11 +54,11 @@ export function renderLagrangeScene(
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
-  configurationTrace: Point[],
+  lagrangeTrace: Point[],
   currentConfigurationPoint: Point,
   color: string
 ): void {
-  if (configurationTrace.length > 1) {
+  if (lagrangeTrace.length > 1) {
     ctx.beginPath();
     ctx.strokeStyle = color;
     ctx.lineWidth = 1.5;
@@ -66,17 +66,17 @@ export function renderLagrangeScene(
     ctx.lineCap = 'round';
 
     const first = mapConfigurationToCanvas(
-      wrapAngle(configurationTrace[0].x),
-      wrapAngle(configurationTrace[0].y),
+      wrapAngle(lagrangeTrace[0].x),
+      wrapAngle(lagrangeTrace[0].y),
       width,
       height
     );
     ctx.moveTo(first.x, first.y);
 
-    for (let i = 1; i < configurationTrace.length; i++)
+    for (let i = 1; i < lagrangeTrace.length; i++)
     {
-        const prev = configurationTrace[i - 1];
-        const curr = configurationTrace[i];
+        const prev = lagrangeTrace[i - 1];
+        const curr = lagrangeTrace[i];
 
         const prevWrappedX = wrapAngle(prev.x);
         const prevWrappedY = wrapAngle(prev.y);

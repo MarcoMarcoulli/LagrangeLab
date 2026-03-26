@@ -1,7 +1,7 @@
 import type { Point } from '../../types/geometry';
 import type { PendulumParameters, PendulumState } from '../../types/Pendulum';
-import { computeAngle, computeDistance, computePolarToCartesian } from '../../utils/GeometryUtils';
-import { SCALED_GRAVITY } from '../../utils/PhysicsConstants';
+import { computeAngle, computeDistance, computePolarToCartesian } from '../../utils/Math/GeometryUtils';
+import { SCALED_GRAVITY } from '../../utils/Math/PhysicsConstants';
 
 export function computeMass1Position(
   pivot: Point, 

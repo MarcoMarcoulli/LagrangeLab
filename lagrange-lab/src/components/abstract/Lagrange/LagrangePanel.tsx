@@ -1,4 +1,4 @@
-import './LagrangePanel.css'
+import '../../Panel.css'
 import { useCallback, useMemo } from 'react';
 import CanvasPanel from '../../canvas/CanvasPanel';
 import type { PendulumSimulationItem } from '../../../simulation/PendulumSimulationItem';
@@ -70,7 +70,7 @@ function LagrangePanel({ simulations }: LagrangePanelProps) {
           ctx,
           width,
           height,
-          sim.configurationTrace,
+          sim.lagrangeTrace,
           currentConfigurationPoint,
           sim.color
         );
@@ -80,13 +80,14 @@ function LagrangePanel({ simulations }: LagrangePanelProps) {
   );
 
   return (
-    <div className="lagrange-container">
+    <div className="panel-container">
       <CanvasPanel onDraw={drawScene} />
 
       <img
         src="/images/lagrange.png"
         alt="Joseph-Louis Lagrange"
-        className="lagrange-image"
+        className="physicist-image"
+        style={{right:0}}
       />
     </div>
   );

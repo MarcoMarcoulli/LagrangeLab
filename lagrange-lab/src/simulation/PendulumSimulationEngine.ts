@@ -142,10 +142,11 @@ export function buildSimulation(
     pivot,
     state: initialState,
     parameters: initialParams,
-    trace: [],
-    phaseTrace: [],
-    phaseTrace2: mass2 ? [] : undefined,
-    configurationTrace: [],
+    newtonTrace: [],
+    lagrangeTrace: [],
+    hamiltonTrace: [],
+    hamiltonTrace2: mass2 ? [] : undefined,
+    jacobiTrace: [],
     color,
   };
 }
@@ -191,11 +192,11 @@ export function stepSimulation(
   return {
     ...sim,
     state: currentState,
-    trace: [...sim.trace, currentPos].slice(-TRACE_POINTS_NEWTON),
-    phaseTrace: [...sim.phaseTrace, phasePoint].slice(-TRACE_POINTS_HAMILTON),
-    phaseTrace2: (phasePoint2 && sim.phaseTrace2) 
-        ? [...sim.phaseTrace2, phasePoint2].slice(-TRACE_POINTS_HAMILTON) 
-        : sim.phaseTrace2,
-    configurationTrace: [...sim.configurationTrace, configurationPoint].slice(-TRACE_POINTS_LAGRANGE),
+    newtonTrace: [...sim.newtonTrace, currentPos].slice(-TRACE_POINTS_NEWTON),
+    hamiltonTrace: [...sim.hamiltonTrace, phasePoint].slice(-TRACE_POINTS_HAMILTON),
+    hamiltonTrace2: (phasePoint2 && sim.hamiltonTrace2) 
+        ? [...sim.hamiltonTrace2, phasePoint2].slice(-TRACE_POINTS_HAMILTON) 
+        : sim.hamiltonTrace2,
+    lagrangeTrace: [...sim.lagrangeTrace, configurationPoint].slice(-TRACE_POINTS_LAGRANGE),
   };
 }

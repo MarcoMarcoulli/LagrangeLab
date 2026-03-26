@@ -1,4 +1,4 @@
-import './NewtonPanel.css';
+import '../Panel.css';
 import { useCallback, useState, useMemo } from 'react';
 import CanvasPanel from '../canvas/CanvasPanel';
 import PhysicalControls from './PhysicalControls';
@@ -7,7 +7,7 @@ import type { Point } from '../../types/geometry';
 
 import { useCanvasViewport } from '../../hooks/useCanvasViewport';
 
-import { drawMass, drawPivot, drawRod } from '../../utils/DrawUtils';
+import { drawMass, drawPivot, drawRod } from '../../utils/Draw/DrawUtils';
 
 import { renderSimplePendulumScene } from '../../rendering/physical/SimplePendulumRenderer';
 import { renderDoublePendulumScene } from '../../rendering/physical/DoublePendulumRenderer';
@@ -17,7 +17,7 @@ import { computeMass2Position } from '../../simulation/models/DoublePendulum';
 
 import { isDoubleState } from '../../utils/TypeGuards';
 
-import { generateColor } from '../../utils/ColorUtils';
+import { generateColor } from '../../utils/Draw/ColorUtils';
 
 type NewtonPanelProps = {
   simulations: PendulumSimulationItem[];
@@ -100,7 +100,7 @@ function NewtonPanel({
 
     for (const simulation of simulations)
     {
-      const { state, parameters, trace, color } = simulation;
+      const { state, parameters, newtonTrace, color } = simulation;
 
       if (isDoubleState(state)) 
       {
@@ -111,7 +111,7 @@ function NewtonPanel({
           pivot,
           m1,
           m2,
-          trace,
+          newtonTrace,
           parameters.massRatio ?? 1,
           color
         );
@@ -119,20 +119,20 @@ function NewtonPanel({
       else
       {
         const mPos = computeMass1Position(pivot, state, parameters);
-        renderSimplePendulumScene(ctx, pivot, mPos, trace, color);
+        renderSimplePendulumScene(ctx, pivot, mPos, newtonTrace, color);
       }
     }
 
     if (mass1)
     {
       drawRod(ctx, pivot, mass1, draftColor);
-      drawMass(ctx, mass1, draftColor);
+      drawMass(ctx, mass1, draftColor, true);
     }
 
     if (mass1 && mass2)
     {
       drawRod(ctx, mass1, mass2, draftColor);
-      drawMass(ctx, mass2, draftColor, massRatio);
+      drawMass(ctx, mass2, draftColor, true, massRatio);
     }
 
     ctx.restore();
@@ -159,7 +159,7 @@ function NewtonPanel({
   }, []);
 
   return (
-    <div className="physical-panel-container">
+    <div className="panel-container">
       <PhysicalControls
         instructionMessage={instructionMessage}
         canStartSimulation={!!mass1}
@@ -183,7 +183,8 @@ function NewtonPanel({
       <img
         src="/images/newton.png"
         alt="Isaac Newton"
-        className="physical-panel-newton-image"
+        className="physicist-image"
+        style={{left:0}}
       />
     </div>
   );

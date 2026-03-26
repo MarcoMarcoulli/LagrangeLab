@@ -53,32 +53,32 @@ export function renderHamiltonScene(
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
-  phaseTrace: Point[],
+  hamiltonTrace: Point[],
   currentPhasePoint: Point,
   color: string,
   omegaMax: number,
   isMass2: boolean = false
 ): void {
-  if (phaseTrace.length > 1) {
+  if (hamiltonTrace.length > 1) {
     ctx.beginPath();
     ctx.strokeStyle = color;
-    ctx.lineWidth = isMass2 ? 1 : 2;
+    ctx.lineWidth = isMass2 ? 2 : 1;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
     let prevPoint = mapPhaseToCanvas(
-      wrapAngle(phaseTrace[0].x),
-      phaseTrace[0].y,
+      wrapAngle(hamiltonTrace[0].x),
+      hamiltonTrace[0].y,
       width,
       height,
       omegaMax
     );
     ctx.moveTo(prevPoint.x, prevPoint.y);
 
-    for (let i = 1; i < phaseTrace.length; i++) {
+    for (let i = 1; i < hamiltonTrace.length; i++) {
       const p = mapPhaseToCanvas(
-        wrapAngle(phaseTrace[i].x),
-        phaseTrace[i].y,
+        wrapAngle(hamiltonTrace[i].x),
+        hamiltonTrace[i].y,
         width,
         height,
         omegaMax
@@ -109,13 +109,13 @@ export function renderHamiltonScene(
   
   if(isMass2)
   {
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.stroke(); 
+    ctx.fillStyle = color;
+    ctx.fill(); 
   }
   else
   {
-    ctx.fillStyle = color;
-    ctx.fill(); 
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.stroke(); 
   }
 }

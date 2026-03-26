@@ -1,4 +1,4 @@
-import type { Point } from '../types/geometry';
+import type { Point, Point3D } from '../types/geometry';
 import type { PendulumState, PendulumParameters } from '../types/Pendulum';
 
 export type PendulumSimulationItem = {
@@ -6,9 +6,10 @@ export type PendulumSimulationItem = {
   pivot: Point;
   state: PendulumState;
   parameters: PendulumParameters;
-  trace: Point[];
-  phaseTrace: Point[];
-  phaseTrace2?: Point[];
-  configurationTrace: Point[];
+  newtonTrace: Point[];
+  lagrangeTrace: Point[];
+  hamiltonTrace: Point[];
+  hamiltonTrace2?: Point[];
+  jacobiTrace: Point3D[];
   color: string;
 };

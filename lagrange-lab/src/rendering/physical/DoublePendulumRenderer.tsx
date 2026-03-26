@@ -1,26 +1,26 @@
 import type { Point } from '../../types/geometry';
-import { drawRod, drawMass } from '../../utils/DrawUtils';
+import { drawRod, drawMass } from '../../utils/Draw/DrawUtils';
 
 export function renderDoublePendulumScene(
   ctx: CanvasRenderingContext2D,
   pivot: Point,
   mass1: Point | null,
   mass2: Point | null,
-  trace: Point[] = [],
+  newtonTrace: Point[] = [],
   massRatio: number,
   color: string
 ): void {
-  if (trace.length > 1) {
+  if (newtonTrace.length > 1) {
     ctx.beginPath();
     ctx.strokeStyle = color; 
     ctx.lineWidth = 1;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
-    ctx.moveTo(trace[0].x, trace[0].y);
-    for (let i = 1; i < trace.length; i++)
+    ctx.moveTo(newtonTrace[0].x, newtonTrace[0].y);
+    for (let i = 1; i < newtonTrace.length; i++)
     {
-      ctx.lineTo(trace[i].x, trace[i].y);
+      ctx.lineTo(newtonTrace[i].x, newtonTrace[i].y);
     }
     ctx.stroke();
   }
@@ -28,10 +28,10 @@ export function renderDoublePendulumScene(
   if (!mass1) return;
 
   drawRod(ctx, pivot, mass1, color);
-  drawMass(ctx, mass1, color);
+  drawMass(ctx, mass1, color, false);
 
   if (!mass2) return;
 
   drawRod(ctx, mass1, mass2, color);
-  drawMass(ctx, mass2, color, massRatio);
+  drawMass(ctx, mass2, color, true, massRatio);
 }

@@ -1,4 +1,4 @@
-import './HamiltonPanel.css'
+import '../../Panel.css';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import CanvasPanel from '../../canvas/CanvasPanel';
 import type { PendulumSimulationItem } from '../../../simulation/PendulumSimulationItem';
@@ -55,14 +55,14 @@ function HamiltonPanel({ simulations }: HamiltonPanelProps) {
           ctx,
           width,
           height,
-          sim.phaseTrace,
+          sim.hamiltonTrace,
           currentPhasePoint,
           sim.color,
           omegaMax,
           false
         );
 
-        if (isDoubleState(sim.state) && sim.phaseTrace2) {
+        if (isDoubleState(sim.state) && sim.hamiltonTrace2) {
           const theta2 = sim.state[2];
           const omega2 = sim.state[3];
           const currentPhasePoint2 = { x: theta2, y: omega2 };
@@ -71,7 +71,7 @@ function HamiltonPanel({ simulations }: HamiltonPanelProps) {
             ctx,
             width,
             height,
-            sim.phaseTrace2,
+            sim.hamiltonTrace2,
             currentPhasePoint2,
             sim.color,
             omegaMax,
@@ -84,7 +84,7 @@ function HamiltonPanel({ simulations }: HamiltonPanelProps) {
   );
 
   return (
-    <div className="hamilton-container"
+    <div className="panel-container"
       ref={containerRef}
       style={{ touchAction: 'none', overflow: 'hidden' }}
     >
@@ -92,7 +92,8 @@ function HamiltonPanel({ simulations }: HamiltonPanelProps) {
       <img
         src="/images/hamilton.png"
         alt="William Rowan Hamilton"
-        className="hamilton-image"
+        className="physicist-image"
+        style={{right:0}}
       />
     </div>
   );

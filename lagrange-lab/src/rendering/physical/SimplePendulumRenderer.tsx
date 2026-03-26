@@ -1,25 +1,25 @@
 import type { Point } from '../../types/geometry';
-import { drawRod, drawMass } from '../../utils/DrawUtils';
+import { drawRod, drawMass } from '../../utils/Draw/DrawUtils';
 
 export function renderSimplePendulumScene(
   ctx: CanvasRenderingContext2D,
   pivot: Point,
   massPosition: Point | null,
-  trace: Point[] = [],
+  newtonTrace: Point[] = [],
   color: string
 ): void {
 
-  if (trace.length > 1)
+  if (newtonTrace.length > 1)
   {
     ctx.beginPath();
     ctx.strokeStyle = color; 
     ctx.lineWidth = 1;
     ctx.lineJoin = 'round';
     
-    ctx.moveTo(trace[0].x, trace[0].y);
-    for (let i = 1; i < trace.length; i++)
+    ctx.moveTo(newtonTrace[0].x, newtonTrace[0].y);
+    for (let i = 1; i < newtonTrace.length; i++)
     {
-      ctx.lineTo(trace[i].x, trace[i].y);
+      ctx.lineTo(newtonTrace[i].x, newtonTrace[i].y);
     }
     ctx.stroke();
   }
@@ -27,5 +27,5 @@ export function renderSimplePendulumScene(
   if (!massPosition) return;
 
   drawRod(ctx, pivot, massPosition, color);
-  drawMass(ctx, massPosition, color);
+  drawMass(ctx, massPosition, color, true);
 }
