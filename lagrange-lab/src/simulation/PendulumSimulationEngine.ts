@@ -20,6 +20,8 @@ import { rungeKutta4Step } from './integrator/RungeKutta';
 
 import { isDoubleState } from '../utils/TypeGuards';
 
+import { computeDoublePendulumTotalEnergy, computeDoublePendulumPotential, computeDoublePendulumKineticEnergy } from './models/DoublePendulum';
+
 const TRACE_POINTS_NEWTON = 60;
 const TRACE_POINTS_HAMILTON = 30;
 const TRACE_POINTS_LAGRANGE = 30;
@@ -150,40 +152,59 @@ export function buildSimulation(
     color,
   };
 }
-
 export function stepSimulation(
   sim: PendulumSimulationItem
-): PendulumSimulationItem | null
-{
+): PendulumSimulationItem | null {
   const substeps = computeSubsteps(sim.state, sim.parameters);
   const dt = FRAME_DT / substeps;
 
+  // 1. Calcoliamo l'energia target una volta sola all'inizio del frame
+  const targetEnergy = computeDoublePendulumTotalEnergy(sim.state, sim.parameters);
+
   let currentState = sim.state;
 
-  const phasePoint: Point = buildPhasePoint(currentState);
+  // --- UNICO CICLO DI AVANZAMENTO ---
+  for (let i = 0; i < substeps; i++) {
+    // A. Avanzamento fisico con RK4
+    currentState = advanceState(currentState, sim.parameters, dt);
 
+    // B. ENERGY CLAMP (Solo per il doppio pendolo)
+    if (isDoubleState(currentState)) {
+      const V = computeDoublePendulumPotential(currentState[0], currentState[2], sim.parameters);
+      const K = computeDoublePendulumKineticEnergy(currentState, sim.parameters);
+      const currentE = V + K;
+
+      // Correzione se l'energia deriva
+      if (Math.abs(currentE - targetEnergy) > 1e-10) {
+        const allowedK = targetEnergy - V;
+
+        if (allowedK <= 0) {
+          // Collisione con il limite: fermiamo le velocità
+          currentState[1] = 0; // omega 1
+          currentState[3] = 0; // omega 2
+        } else {
+          // Riscalamento delle velocità per conservare l'energia
+          const correctionFactor = Math.sqrt(allowedK / K);
+          currentState[1] *= correctionFactor;
+          currentState[3] *= correctionFactor;
+        }
+      }
+    }
+
+    // C. Controllo esplosione (NaN o valori infiniti)
+    if (Number.isNaN(currentState[0]) || (isDoubleState(currentState) && Number.isNaN(currentState[2]))) {
+      console.error(`Physics exploded for simulation ${sim.id}`);
+      return null;
+    }
+  }
+
+  // --- CALCOLO DEI PUNTI PER LE SCIE (Dopo che la fisica è stabile) ---
+  const phasePoint: Point = buildPhasePoint(currentState);
   const phasePoint2: Point | undefined = isDoubleState(currentState) 
     ? { x: currentState[2], y: currentState[3] } 
     : undefined;
   
   const configurationPoint: Point = buildConfigurationPoint(currentState);
-
-  for (let i = 0; i < substeps; i++) {
-    const wasDouble = isDoubleState(currentState);
-    currentState = advanceState(currentState, sim.parameters, dt);
-    const theta1 = currentState[0];
-    const theta2 = currentState[2];
-
-    const exploded =
-      Number.isNaN(theta1) ||
-      (wasDouble && isNaN(theta2 ?? NaN));
-
-    if (exploded)
-    {
-      console.error(`Physics exploded for simulation ${sim.id}`);
-      return null;
-    }
-  }
 
   const currentPos = isDoubleState(currentState)
     ? computeMass2Position(sim.pivot, currentState, sim.parameters)

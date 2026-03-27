@@ -121,25 +121,37 @@ function CanvasPanel({
   const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (!onCanvasMouseDown) return;
     const point = getCanvasPoint(event);
-    if (point) onCanvasMouseDown(point, event);
+    if (point)
+    {
+      onCanvasMouseDown(point, event);
+    }
   };
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (!onCanvasMouseMove) return;
     const point = getCanvasPoint(event);
-    if (point) onCanvasMouseMove(point, event);
+    if (point)
+    {
+      onCanvasMouseMove(point, event);
+    }
   };
 
   const handleMouseUp = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (!onCanvasMouseUp) return;
     const point = getCanvasPoint(event);
-    if (point) onCanvasMouseUp(point, event);
+    if (point)
+    {
+      onCanvasMouseUp(point, event);
+    }
   };
 
   const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (!onCanvasClick) return;
     const point = getCanvasPoint(event);
-    if (point) onCanvasClick(point);
+    if (point)
+    {
+      onCanvasClick(point);
+    }
   };
 
   return (
