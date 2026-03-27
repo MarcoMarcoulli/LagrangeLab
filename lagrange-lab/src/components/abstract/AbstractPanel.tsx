@@ -1,5 +1,5 @@
 import '../Panel.css'
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { PendulumSimulationItem } from '../../simulation/PendulumSimulationItem';
 
 import LagrangePanel from './Lagrange/LagrangePanel';
@@ -15,8 +15,27 @@ type AbstractPanelProps = {
 function AbstractPanel({ simulations }: AbstractPanelProps) {
   const [viewMode, setViewMode] = useState<AbstractViewMode>('lagrange');
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const div = containerRef.current;
+    if (!div) return;
+
+    const handleNativeWheel = (e: WheelEvent) => {
+      // Ferma lo scroll della pagina e lo zoom (Ctrl + Rotella)
+      e.preventDefault(); 
+    };
+
+    // { passive: false } è necessario per far funzionare preventDefault()
+    div.addEventListener('wheel', handleNativeWheel, { passive: false });
+
+    return () => {
+      div.removeEventListener('wheel', handleNativeWheel);
+    };
+  }, []);
+
   return (
-    <div className="panel-container">
+    <div className="panel-container" ref={containerRef} style={{ touchAction: 'none' }}>
       <div className="view-toggle-container">
         <button
           onClick={() => setViewMode('lagrange')}

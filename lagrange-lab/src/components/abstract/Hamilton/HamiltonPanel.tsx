@@ -86,7 +86,6 @@ function HamiltonPanel({ simulations }: HamiltonPanelProps) {
   return (
     <div className="panel-container"
       ref={containerRef}
-      style={{ touchAction: 'none', overflow: 'hidden' }}
     >
       <CanvasPanel onDraw={drawScene} />
       <img

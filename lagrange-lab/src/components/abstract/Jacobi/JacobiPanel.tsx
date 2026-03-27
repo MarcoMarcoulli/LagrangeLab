@@ -1,118 +1,184 @@
 import '../../Panel.css';
-import { useState, useCallback, useRef } from 'react';
-import CanvasPanel from '../../canvas/CanvasPanel';
+import { useMemo } from 'react';
+import * as THREE from 'three';
+import { Canvas } from '@react-three/fiber';
+import { TrackballControls, Line, Edges } from '@react-three/drei';
 import type { PendulumSimulationItem } from '../../../simulation/PendulumSimulationItem';
-
 import { isDoubleState } from '../../../utils/TypeGuards';
-import { computeDoublePendulumTotalEnergy } from '../../../simulation/models/DoublePendulum';
-
-import {
-  drawJacobiTorus,
-  renderJacobiTrace
-} from '../../../rendering/abstract/JacobiRenderer';
 
 type JacobiPanelProps = {
   simulations: PendulumSimulationItem[];
 };
 
-function JacobiPanel({ simulations }: JacobiPanelProps) {
-  const [rotation, setRotation] = useState({ x: Math.PI / 4, y: -Math.PI / 6 });
-  
-  const isDragging = useRef(false);
-  const lastMouse = useRef({ x: 0, y: 0 });
+function JacobiAxes() {
+  const segments = 120;
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    isDragging.current = true;
-    lastMouse.current = { x: e.clientX, y: e.clientY };
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging.current) return;
-    const dx = e.clientX - lastMouse.current.x;
-    const dy = e.clientY - lastMouse.current.y;
-    
-    setRotation(prev => ({
-      x: prev.x + dy * 0.01,
-      y: prev.y + dx * 0.01,
-    }));
-    
-    lastMouse.current = { x: e.clientX, y: e.clientY };
-  };
-
-  const handleMouseUpOrLeave = () => {
-    isDragging.current = false;
-  };
-
-  // Prendiamo la prima simulazione in assoluto (singola o doppia non importa)
-  const firstSim = simulations.length > 0 ? simulations[0] : null;
-
-  // Calcoliamo l'energia totale (ci serve per colorare il Toro di background)
-  let totalEnergy: number | null = null;
-  if (firstSim) {
-    if (isDoubleState(firstSim.state)) {
-      totalEnergy = computeDoublePendulumTotalEnergy(firstSim.state, firstSim.parameters);
-    } else {
-      // NOTA: Se vuoi colorare il toro anche per il singolo, ti servirà la sua energia.
-      // totalEnergy = computeSimplePendulumTotalEnergy(firstSim.state, firstSim.parameters);
-      totalEnergy = 100; // Valore di fallback temporaneo per non rompere il rendering
+  // 1. Asse Toroidale (Theta 2 = 0): Il grande cerchio esterno
+  const toroidalAxis = useMemo(() => {
+    const points = [];
+    for (let i = 0; i <= segments; i++) {
+      const t1 = (i / segments) * Math.PI * 2;
+      points.push(getTorusPoint(t1, 0)); // Theta 2 fisso a 0
     }
-  }
+    return points;
+  }, []);
 
-  const drawScene = useCallback(
-    (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-      ctx.clearRect(0, 0, width, height);
-
-      // Disegniamo il Toro di Jacobi come "palcoscenico" di base
-      if (firstSim && totalEnergy !== null) {
-        drawJacobiTorus(
-          ctx, 
-          width, 
-          height, 
-          totalEnergy, 
-          firstSim.parameters, 
-          rotation.x, 
-          rotation.y,
-          isDoubleState(firstSim.state) // Passiamo un flag per sapere se è doppio
-        );
-      }
-
-      // Disegniamo le tracce per TUTTE le simulazioni
-      for (const sim of simulations) {
-        const theta1 = sim.state[0];
-        // Il trucco magico: se è singolo, theta2 è semplicemente 0 (il "caso banale")
-        const theta2 = isDoubleState(sim.state) ? sim.state[2] : 0;
-
-        renderJacobiTrace(
-          ctx,
-          width,
-          height,
-          sim.jacobiTrace, // Che ha già y=0 per i pendoli singoli grazie a Lagrange!
-          { x: theta1, y: theta2 },
-          sim.color,
-          rotation.x,
-          rotation.y
-        );
-      }
-    },
-    [simulations, totalEnergy, rotation, firstSim]
-  );
+  // 2. Asse Poloidale (Theta 1 = 0): Il cerchio che avvolge il tubo
+  const poloidalAxis = useMemo(() => {
+    const points = [];
+    for (let i = 0; i <= segments; i++) {
+      const t2 = (i / segments) * Math.PI * 2;
+      points.push(getTorusPoint(0, t2)); // Theta 1 fisso a 0
+    }
+    return points;
+  }, []);
 
   return (
-    <div 
-      className="panel-container"
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUpOrLeave}
-      onMouseLeave={handleMouseUpOrLeave}
-      style={{ touchAction: 'none', overflow: 'hidden', cursor: isDragging.current ? 'grabbing' : 'grab' }}
-    >
-      <CanvasPanel onDraw={drawScene} />
+    <group>
+      {/* Linea Theta 2 = 0 (Orizzontale/Equatore) */}
+      <Line
+        points={toroidalAxis}
+        color="#f9f6f5ff"
+        lineWidth={3}
+        transparent={true}
+        opacity={1}
+      />
+      
+      {/* Linea Theta 1 = 0 (Verticale/Sezione) */}
+      <Line
+        points={poloidalAxis}
+        color="#fbf8f7ff" 
+        lineWidth={3}
+        transparent={true}
+        opacity={1}
+      />
+    </group>
+  );
+}
+
+// --- COSTANTI DEL TORO ---
+const R = 2;   // Raggio Maggiore (la grandezza della ciambella)
+const r = 0.8; // Raggio Minore (lo spessore del tubo)
+
+// Funzione matematica per convertire theta1 e theta2 in coordinate 3D spaziali (X, Y, Z)
+function getTorusPoint(theta1: number, theta2: number, offset: number = 0): THREE.Vector3 {
+  // L'orientamento standard di Three.js per il TorusGeometry è sul piano X-Y
+  const x = (R + (r + offset) * Math.cos(theta2)) * Math.cos(theta1);
+  const y = (R + (r + offset) * Math.cos(theta2)) * Math.sin(theta1);
+  const z = (r + offset) * Math.sin(theta2);
+  return new THREE.Vector3(x, y, z);
+}
+
+function JacobiTrace({ trace, currentPoint, color }: { trace: {x: number, y: number}[], currentPoint: {x: number, y: number}, color: string }) {
+  
+  const points3D = useMemo(() => {
+  if (!trace || trace.length < 2) return [];
+  
+  const maxPoints = 300;
+  const recentTrace = trace.slice(-maxPoints);
+  
+  const rawPoints = recentTrace.map(p => getTorusPoint(p.x, p.y, 0.01));
+  const curve = new THREE.CatmullRomCurve3(rawPoints, false, 'catmullrom', 0.2);
+  return curve.getPoints(recentTrace.length * 2);
+}, [trace]);
+
+  const currentPos3D = getTorusPoint(currentPoint.x, currentPoint.y, 0.01);
+
+  return (
+    <group>
+      {/* 1. La linea della scia */}
+      {points3D.length > 1 && (
+        <Line
+          points={points3D}
+          color={color}
+          lineWidth={4} 
+          transparent={true}
+          toneMapped={false}
+          depthTest={true}
+          depthWrite={false}
+          opacity={1}
+        />
+      )}
+
+      {/* 2. Il "pallino" che rappresenta la posizione attuale del pendolo */}
+      <mesh position={currentPos3D}>
+        <sphereGeometry args={[0.08, 16, 16]} />
+        {/* Emissive fa sembrare che il pallino emetta luce propria! */}
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={2} />
+      </mesh>
+    </group>
+  );
+}
+
+// --- PANNELLO PRINCIPALE ---
+function JacobiPanel({ simulations }: JacobiPanelProps) {
+  
+  return (
+    <div className="panel-container" style={{ touchAction: 'none' }}>
+      
+      <Canvas camera={{ position: [2, -8, 6], fov: 45 }}>
+        <ambientLight intensity={0.3} />
+        <directionalLight position={[5, 5, 5]} intensity={1.2} castShadow />
+        <pointLight position={[-5, 5, -5]} intensity={0.5} color="#444" />
+        <spotLight position={[0, 10, 0]} angle={0.3} penumbra={1} intensity={1} />
+
+        <TrackballControls 
+          makeDefault 
+          rotateSpeed={4.0}
+          noPan={false}
+          noZoom={false}
+          staticMoving={false} // Aggiunge un po' di inerzia fluida
+          dynamicDampingFactor={0.1}
+        />
+
+        {/* Il Palcoscenico: Il Toro */}
+        <mesh>
+          {/* Riducendo leggermente i segmenti (es. 40, 20) i rettangoli diventano più larghi e "matematici" */}
+          <torusGeometry args={[R, r, 40, 55]} />
+          
+          <meshPhysicalMaterial 
+            color="#0d47a1" // Un blu più profondo
+            roughness={0.1}
+            metalness={0.1}
+            transparent={true}
+            opacity={0.2}  
+            transmission={0.5} 
+            thickness={0.5}
+          />
+
+          {/* La griglia rettangolare */}
+          <Edges
+            threshold={0.1}    // Nasconde le diagonali dei triangoli
+            color="#64ffda"   // Un colore ciano/neon per far risaltare la griglia
+            transparent={true}
+            opacity={0.8}
+          />
+        </mesh>
+
+        <JacobiAxes />
+
+        {/* Disegniamo gli attori: Le simulazioni attive */}
+        {simulations.map((sim, index) => {
+          const theta1 = sim.state[0];
+          const theta2 = isDoubleState(sim.state) ? sim.state[2] : 0;
+          
+          return (
+            <JacobiTrace
+              key={index} // Se hai un sim.id è meglio usare quello
+              trace={sim.lagrangeTrace}
+              currentPoint={{ x: theta1, y: theta2 }}
+              color={sim.color}
+            />
+          );
+        })}
+
+      </Canvas>
 
       <img
         src="/images/jacobi.png"
         alt="Carl Gustav Jacob Jacobi"
         className="physicist-image"
-        style={{right:0}}
+        style={{ right: 0 }}
       />
     </div>
   );
