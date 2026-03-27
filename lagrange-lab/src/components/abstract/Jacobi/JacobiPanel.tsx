@@ -57,8 +57,8 @@ function JacobiAxes() {
 }
 
 // --- COSTANTI DEL TORO ---
-const R = 2;   // Raggio Maggiore (la grandezza della ciambella)
-const r = 0.8; // Raggio Minore (lo spessore del tubo)
+const R = 2.5;   // Raggio Maggiore (la grandezza della ciambella)
+const r = 1; // Raggio Minore (lo spessore del tubo)
 
 // Funzione matematica per convertire theta1 e theta2 in coordinate 3D spaziali (X, Y, Z)
 function getTorusPoint(theta1: number, theta2: number, offset: number = 0): THREE.Vector3 {
@@ -77,12 +77,12 @@ function JacobiTrace({ trace, currentPoint, color }: { trace: {x: number, y: num
   const maxPoints = 300;
   const recentTrace = trace.slice(-maxPoints);
   
-  const rawPoints = recentTrace.map(p => getTorusPoint(p.x, p.y, 0.01));
+  const rawPoints = recentTrace.map(p => getTorusPoint(p.x, p.y, 0.02));
   const curve = new THREE.CatmullRomCurve3(rawPoints, false, 'catmullrom', 0.2);
   return curve.getPoints(recentTrace.length * 2);
 }, [trace]);
 
-  const currentPos3D = getTorusPoint(currentPoint.x, currentPoint.y, 0.01);
+  const currentPos3D = getTorusPoint(currentPoint.x, currentPoint.y, 0.02);
 
   return (
     <group>
