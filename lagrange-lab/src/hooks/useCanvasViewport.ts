@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import type { Point } from '../types/geometry';
+import type { Point } from '../types/Geometry';
 
-import type { Viewport } from '../types/viewport';
+import type { Viewport } from '../types/Viewport';
 
 export function useCanvasViewport(initialScale = 1) {
   const [viewport, setViewport] = useState<Viewport>({

@@ -1,4 +1,4 @@
-import type { Point } from '../../types/geometry';
+import type { Point } from '../../types/Geometry';
 import type { PendulumState, PendulumParameters } from '../../types/Pendulum';
 import { computeAngle, computeDistance, computePolarToCartesian } from '../../utils/Math/GeometryUtils';
 import { computeMass1Position, buildBaseParameters, buildBaseInitialState } from './PendulumCommon';

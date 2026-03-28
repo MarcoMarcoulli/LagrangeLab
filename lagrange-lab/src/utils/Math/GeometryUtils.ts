@@ -1,4 +1,4 @@
-import type { Point } from "../../types/geometry"
+import type { Point } from "../../types/Geometry"
 
 export function computeDistance(p1: Point, p2: Point): number
 {

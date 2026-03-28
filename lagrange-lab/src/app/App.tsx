@@ -1,5 +1,5 @@
 import "./App.css";
-import NewtonPanel from "../components/physical/NewtonPanel";
+import PhysicalPanel from "../components/physical/PhysicalPanel";
 import AbstractPanel from "../components/abstract/AbstractPanel";
 import { usePendulumSimulation } from "../hooks/usePendulumSimulation";
 
@@ -11,6 +11,7 @@ function App()
     hasSimulations,
     isPaused,
     addSimulation,
+    addChaosSwarm,
     togglePause,
     reset,
   } = usePendulumSimulation();
@@ -20,6 +21,7 @@ function App()
     hasSimulations,
     isPaused,
     addSimulation,
+    addChaosSwarm,
     togglePause,
     reset,
   };
@@ -27,7 +29,7 @@ function App()
   return (
     <main className="app-container">
       <section className="left-panel">
-        <NewtonPanel
+        <PhysicalPanel
           simulations={simulations}
           {...simulationControls}
         />

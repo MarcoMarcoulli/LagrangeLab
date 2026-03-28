@@ -1,4 +1,4 @@
-import type { Point } from '../../types/geometry';
+import type { Point } from '../../types/Geometry';
 import type { PendulumParameters, PendulumState } from '../../types/Pendulum';
 import { computeAngle, computeDistance, computePolarToCartesian } from '../../utils/Math/GeometryUtils';
 import { SCALED_GRAVITY } from '../../utils/Math/PhysicsConstants';

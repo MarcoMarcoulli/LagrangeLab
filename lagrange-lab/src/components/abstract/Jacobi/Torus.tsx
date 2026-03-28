@@ -97,11 +97,12 @@ export function Torus({ parameters, totalEnergy }: TorusProps) {
 
     const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
     texture.colorSpace = THREE.SRGBColorSpace;
-    texture.magFilter = THREE.LinearFilter; // Smoothing dei pixel
+    texture.magFilter = THREE.LinearFilter; 
+    texture.anisotropy = 16;
     texture.needsUpdate = true; 
     return texture;
 
-  }, [parameters, totalEnergy]);
+  }, [parameters, totalEnergy ? Math.round(totalEnergy * 1000) : null]);
 
   return (
     <mesh>

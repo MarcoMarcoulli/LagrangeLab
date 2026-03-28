@@ -1,4 +1,4 @@
-import '../../Panel.css';
+import '../../../styles/Panel.css';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import CanvasPanel from '../../canvas/CanvasPanel';
 import type { PendulumSimulationItem } from '../../../simulation/PendulumSimulationItem';

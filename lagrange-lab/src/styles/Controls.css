@@ -1,0 +1,71 @@
+.control-bar-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: row; 
+  flex-wrap: wrap;
+  gap: 20px;        
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  background-color: transparent; 
+  border-bottom: 1px solid #ccc;
+  pointer-events: none; 
+}
+
+.instruction-label {
+  left: 10;
+  padding: 8px 12px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: black;
+}
+
+.action-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #888;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  pointer-events: auto;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+}
+
+.btn-play { background-color: #4CAF50; }
+.btn-pause { background-color: #FF9800; }
+.btn-resume { background-color: #2196F3; }
+.btn-reset { background-color: #f44336; }
+
+.btn-chaos {
+  background-color: #9c27b0;
+  box-shadow: 0 0 10px rgba(156, 39, 176, 0.5);
+}
+
+.sliders-wrapper {
+  display: flex; 
+  gap: 20px; 
+  pointer-events: auto; 
+  background-color: rgba(123, 119, 119, 0.8); 
+  padding: 8px 16px; 
+  border-radius: 8px;
+}
+
+.slider-label {
+  display: inline-block; 
+  font-size: 12px;
+}
+
+.slider-label.lyapunov-color {
+  color: #9c27b0;
+}

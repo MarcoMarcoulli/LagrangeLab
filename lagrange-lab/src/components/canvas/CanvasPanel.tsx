@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
-import type { Point } from '../../types/geometry';
+import type { Point } from '../../types/Geometry';
 
 type CanvasPanelProps = {
   onDraw?: (

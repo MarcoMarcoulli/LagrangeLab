@@ -1,4 +1,5 @@
-import type { Point } from '../types/geometry';
+import { generateColor } from '../utils/Draw/ColorUtils';
+import type { Point } from '../types/Geometry';
 import type { PendulumState, PendulumParameters } from '../types/Pendulum';
 import type { PendulumSimulationItem } from './PendulumSimulationItem';
 
@@ -21,10 +22,14 @@ import { rungeKutta4Step } from './integrator/RungeKutta';
 import { isDoubleState } from '../utils/TypeGuards';
 
 import { computeDoublePendulumTotalEnergy, computeDoublePendulumPotential, computeDoublePendulumKineticEnergy } from './models/DoublePendulum';
+import { getTorusPoint } from '../utils/Math/TorusMath';
 
-const TRACE_POINTS_NEWTON = 60;
+const TRACE_POINTS_NEWTON = 45;
 const TRACE_POINTS_HAMILTON = 30;
 const TRACE_POINTS_LAGRANGE = 30;
+const TRACE_POINTS_JACOBI = 15;
+const TRACE_POINTS_LYAPUNOV = 25;
+
 const FRAME_DT = 0.016;
 
 function addStates(a: PendulumState, b: PendulumState): PendulumState {
@@ -122,7 +127,8 @@ export function buildSimulation(
   mass1: Point,
   mass2: Point | null,
   color: string,
-  massRatio: number = 1
+  massRatio: number = 1,
+  isSwarm: boolean = false
 ): PendulumSimulationItem
 {
   let initialState: PendulumState;
@@ -150,8 +156,10 @@ export function buildSimulation(
     hamiltonTrace2: mass2 ? [] : undefined,
     jacobiTrace: [],
     color,
+    isSwarm
   };
 }
+
 export function stepSimulation(
   sim: PendulumSimulationItem
 ): PendulumSimulationItem | null {
@@ -205,19 +213,70 @@ export function stepSimulation(
     : undefined;
   
   const configurationPoint: Point = buildConfigurationPoint(currentState);
+  const currentTorusPoint = getTorusPoint(configurationPoint.x, configurationPoint.y, 0.02);
 
   const currentPos = isDoubleState(currentState)
     ? computeMass2Position(sim.pivot, currentState, sim.parameters)
     : computeSimplePos(sim.pivot, currentState, sim.parameters);
 
+  const physicalTraceLimit = sim.isSwarm ? TRACE_POINTS_LYAPUNOV : TRACE_POINTS_NEWTON;
+
   return {
     ...sim,
     state: currentState,
-    newtonTrace: [...sim.newtonTrace, currentPos].slice(-TRACE_POINTS_NEWTON),
+    newtonTrace: [...sim.newtonTrace, currentPos].slice(-physicalTraceLimit),
     hamiltonTrace: [...sim.hamiltonTrace, phasePoint].slice(-TRACE_POINTS_HAMILTON),
     hamiltonTrace2: (phasePoint2 && sim.hamiltonTrace2) 
         ? [...sim.hamiltonTrace2, phasePoint2].slice(-TRACE_POINTS_HAMILTON) 
         : sim.hamiltonTrace2,
     lagrangeTrace: [...sim.lagrangeTrace, configurationPoint].slice(-TRACE_POINTS_LAGRANGE),
+    jacobiTrace: [...sim.jacobiTrace, currentTorusPoint].slice(-TRACE_POINTS_JACOBI),
   };
+}
+
+/**
+ * Crea un intero sciame di pendoli partendo da una configurazione base
+ * applicando una perturbazione crescente (Epsilon)
+ */
+export function buildChaosSwarm(
+  pivot: Point,
+  mass1: Point,
+  mass2: Point | null,
+  baseColor: string,
+  massRatio: number,
+  swarmSize: number,
+  epsilon: number
+): PendulumSimulationItem[] {
+  // 1. Creiamo il "Leader" (quello che l'utente ha disegnato)
+  const leader = buildSimulation(pivot, mass1, mass2, baseColor, massRatio, true);
+  
+  const swarm: PendulumSimulationItem[] = [];
+
+  for (let i = 0; i < swarmSize; i++) {
+    // 2. Creiamo un clone partendo dai dati del leader
+    // Nota: copiamo lo stato (Float64Array) per non condividere il riferimento in memoria!
+    const newState = new Float64Array(leader.state);
+    
+    // 3. Applichiamo la perturbazione di Lyapunov
+    // La applichiamo a theta2 (se doppio) o theta1 (se semplice)
+    // Usiamo (i * epsilon) per distribuire i cloni a ventaglio
+    if (isDoubleState(newState)) {
+      newState[2] += (i * epsilon); // Perturbazione su Theta 2
+    } else {
+      newState[0] += (i * epsilon); // Perturbazione su Theta 1
+    }
+
+    const uniqueColor = i === 0 ? baseColor : generateColor();
+
+    swarm.push({
+      ...leader,
+      id: crypto.randomUUID(), // Ogni clone deve avere il suo ID unico
+      state: newState,
+      color: uniqueColor,
+      // Se vuoi che il leader sia distinguibile, puoi modificare il colore qui
+      newtonTrace: [],
+    });
+  }
+
+  return swarm;
 }

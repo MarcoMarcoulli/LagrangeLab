@@ -1,34 +1,31 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
 import { Line } from '@react-three/drei';
-import { getTorusPoint } from '../../../utils/Math/TorusMath';
+import type { Point3D } from '../../../types/Geometry';
 
 type JacobiTraceProps = {
-  trace: { x: number; y: number }[];
-  currentPoint: { x: number; y: number };
+  // Ora passiamo direttamente l'array di Point3D che il motore ha già calcolato
+  trace: Point3D[]; 
   color: string;
 };
 
-export function JacobiTrace({ trace, currentPoint, color }: JacobiTraceProps) {
+export function JacobiTrace({ trace, color }: JacobiTraceProps) {
   
   const points3D = useMemo(() => {
     if (!trace || trace.length < 2) return [];
     
-    const maxPoints = 300;
-    const recentTrace = trace.slice(-maxPoints);
-    
-    // Generiamo i punti crudi con un piccolo offset (0.02) per non sprofondare nel toro
-    const rawPoints = recentTrace.map(p => getTorusPoint(p.x, p.y, 0.02));
+    // Trasformiamo i Point3D in Vector3 (formato nativo di Three.js)
+    const vector3Points = trace.map(p => new THREE.Vector3(p.x, p.y, p.z));
     
     // Creiamo la curva fluida
-    const curve = new THREE.CatmullRomCurve3(rawPoints, false, 'catmullrom', 0.2);
+    const curve = new THREE.CatmullRomCurve3(vector3Points, false, 'catmullrom', 0.2);
     
-    // Aumentiamo i campionamenti per una linea bella piena e solida
-    return curve.getPoints(recentTrace.length * 2);
+    // Campioniamo la curva per renderla solida
+    return curve.getPoints(trace.length * 2);
   }, [trace]);
 
-  // Calcoliamo la posizione del pallino di testa (leggermente più sporgente, 0.02 o 0.03)
-  const currentPos3D = getTorusPoint(currentPoint.x, currentPoint.y, 0.02);
+  // La "testa" è semplicemente l'ultimo punto della traccia
+  const headPoint = trace.length > 0 ? trace[trace.length - 1] : null;
 
   return (
     <group>
@@ -39,23 +36,25 @@ export function JacobiTrace({ trace, currentPoint, color }: JacobiTraceProps) {
           color={color}
           lineWidth={4} 
           transparent={true}
-          toneMapped={false}  // Disabilitiamo il tone mapping per mantenere i colori brillanti
+          toneMapped={false} 
           depthTest={true}
-          depthWrite={false}  // Lasciamolo false se abbiamo transparent={true}
-          opacity={1}
+          depthWrite={false} 
+          opacity={0.8} // Un pelo di trasparenza la rende più eterea
         />
       )}
 
-      {/* 2. Il "pallino" che rappresenta la posizione attuale del pendolo */}
-      <mesh position={currentPos3D}>
-        <sphereGeometry args={[0.08, 16, 16]} />
-        <meshStandardMaterial 
-          color={color} 
-          emissive={color} 
-          emissiveIntensity={2} 
-          toneMapped={false} // Rende il pallino "acceso" come un neon
-        />
-      </mesh>
+      {/* 2. Il "pallino" di testa */}
+      {headPoint && (
+        <mesh position={[headPoint.x, headPoint.y, headPoint.z]}>
+          <sphereGeometry args={[0.07, 16, 16]} />
+          <meshStandardMaterial 
+            color={color} 
+            emissive={color} 
+            emissiveIntensity={3} // Più ignorante, per farlo risaltare bene
+            toneMapped={false} 
+          />
+        </mesh>
+      )}
     </group>
   );
 }

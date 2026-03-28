@@ -1,23 +1,25 @@
-import '../Panel.css';
+import '../../../styles/Panel.css';
 import { useCallback, useState, useMemo } from 'react';
-import CanvasPanel from '../canvas/CanvasPanel';
-import PhysicalControls from './PhysicalControls';
-import type { PendulumSimulationItem } from '../../simulation/PendulumSimulationItem';
-import type { Point } from '../../types/geometry';
+import CanvasPanel from '../../canvas/CanvasPanel';
+import NewtonControls from './NewtonControls';
+import type { PendulumSimulationItem } from '../../../simulation/PendulumSimulationItem';
+import type { Point } from '../../../types/Geometry';
 
-import { useCanvasViewport } from '../../hooks/useCanvasViewport';
+import { useCanvasViewport } from '../../../hooks/useCanvasViewport';
 
-import { drawMass, drawPivot, drawRod } from '../../utils/Draw/DrawUtils';
+import { drawMass, drawPivot, drawRod } from '../../../utils/Draw/DrawUtils';
 
-import { renderSimplePendulumScene } from '../../rendering/physical/SimplePendulumRenderer';
-import { renderDoublePendulumScene } from '../../rendering/physical/DoublePendulumRenderer';
+import { 
+  renderSimplePendulumScene, 
+  renderDoublePendulumScene 
+} from '../../../rendering/physical/PhysicalRenderer';
 
-import { computeMass1Position } from '../../simulation/models/PendulumCommon';
-import { computeMass2Position } from '../../simulation/models/DoublePendulum';
+import { computeMass1Position } from '../../../simulation/models/PendulumCommon';
+import { computeMass2Position } from '../../../simulation/models/DoublePendulum';
 
-import { isDoubleState } from '../../utils/TypeGuards';
+import { isDoubleState } from '../../../utils/TypeGuards';
 
-import { generateColor } from '../../utils/Draw/ColorUtils';
+import { generateColor } from '../../../utils/Draw/ColorUtils';
 
 type NewtonPanelProps = {
   simulations: PendulumSimulationItem[];
@@ -64,7 +66,7 @@ function NewtonPanel({
     }
 
     if (!mass2) {
-      return 'Premi Play per aggiungere un pendolo semplice oppure clicca per posizionare la seconda massa.';
+      return 'Premi Play per aggiungere un pendolo semplice oppure posiziona la seconda massa.';
     }
 
     return 'Premi Play per aggiungere il doppio pendolo.';
@@ -159,8 +161,8 @@ function NewtonPanel({
   }, []);
 
   return (
-    <div className="panel-container">
-      <PhysicalControls
+    <div className="panel-content-wrapper">
+      <NewtonControls
         instructionMessage={instructionMessage}
         canStartSimulation={!!mass1}
         hasSimulations={hasSimulations}
@@ -184,7 +186,7 @@ function NewtonPanel({
         src="/images/newton.png"
         alt="Isaac Newton"
         className="physicist-image"
-        style={{left:0}}
+        style={{ left: 0 }} // Specifichiamo il lato qui se non è nel CSS
       />
     </div>
   );

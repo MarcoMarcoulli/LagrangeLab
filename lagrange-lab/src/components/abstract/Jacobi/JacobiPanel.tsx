@@ -1,4 +1,4 @@
-import '../../Panel.css';
+import '../../../styles/Panel.css';
 import { useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { TrackballControls } from '@react-three/drei';
@@ -29,7 +29,7 @@ function JacobiPanel({ simulations }: JacobiPanelProps) {
 
     return computeDoublePendulumTotalEnergy(activeSim.state, activeSim.parameters);
     
-  }, [activeSim?.id, activeSim?.parameters]);
+  }, [activeSim?.id]);
 
   return (
     <div className="panel-container" style={{ touchAction: 'none' }}>
@@ -50,26 +50,21 @@ function JacobiPanel({ simulations }: JacobiPanelProps) {
         />
         <TorusAxes />
 
-        {simulations.map((sim, index) => {
-          const theta1 = sim.state[0];
-          const theta2 = isDoubleState(sim.state) ? sim.state[2] : 0;
-          
-          return (
-            <JacobiTrace
-              key={sim.id || index} 
-              trace={sim.lagrangeTrace}
-              currentPoint={{ x: theta1, y: theta2 }}
-              color={sim.color}
-            />
-          );
-        })}
+        {simulations.map((sim) => (
+          <JacobiTrace
+            key={sim.id} 
+            // Usiamo la traccia 3D pre-calcolata dal motore fisico!
+            trace={sim.jacobiTrace} 
+            color={sim.color}
+          />
+        ))}
       </Canvas>
 
       <img
         src="/images/jacobi.png"
         alt="Carl Gustav Jacob Jacobi"
         className="physicist-image"
-        style={{ right: 0 }}
+        style={{right:0}}
       />
     </div>
   );

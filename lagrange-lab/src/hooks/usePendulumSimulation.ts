@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import type { Point } from '../types/geometry';
+import type { Point } from '../types/Geometry';
 import type { PendulumSimulationItem } from '../simulation/PendulumSimulationItem';
-import { buildSimulation, stepSimulation } from '../simulation/PendulumSimulationEngine';
+import { buildSimulation, stepSimulation, buildChaosSwarm } from '../simulation/PendulumSimulationEngine';
 
 export function usePendulumSimulation() {
   const [isPaused, setIsPaused] = useState(false);
@@ -20,7 +20,22 @@ export function usePendulumSimulation() {
     ) => {
       const newSimulation = buildSimulation(pivot, mass1, mass2, color, massRatio);
       setSimulations(prev => [...prev, newSimulation]);
-    },[]);
+    }, []);
+  
+  const addChaosSwarm = useCallback(
+    (
+      pivot: Point,
+      mass1: Point,
+      mass2: Point | null,
+      baseColor: string,
+      massRatio: number,
+      swarmSize: number,
+      epsilon: number
+    ) => {
+      const newSwarm = buildChaosSwarm(pivot, mass1, mass2, baseColor, massRatio, swarmSize, epsilon);
+      
+      setSimulations(prev => [...prev, ...newSwarm]);
+    }, []);
 
   const reset = useCallback(() => {
     setSimulations([]);
@@ -70,6 +85,7 @@ export function usePendulumSimulation() {
     hasSimulations,
     isPaused,
     addSimulation,
+    addChaosSwarm,
     togglePause,
     reset,
   };

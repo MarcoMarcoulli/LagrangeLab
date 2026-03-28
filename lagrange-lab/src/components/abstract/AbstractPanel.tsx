@@ -1,4 +1,4 @@
-import '../Panel.css'
+import '../../styles/Panel.css'
 import { useState, useEffect, useRef } from 'react';
 import type { PendulumSimulationItem } from '../../simulation/PendulumSimulationItem';
 
@@ -26,7 +26,6 @@ function AbstractPanel({ simulations }: AbstractPanelProps) {
       e.preventDefault(); 
     };
 
-    // { passive: false } è necessario per far funzionare preventDefault()
     div.addEventListener('wheel', handleNativeWheel, { passive: false });
 
     return () => {
@@ -36,7 +35,7 @@ function AbstractPanel({ simulations }: AbstractPanelProps) {
 
   return (
     <div className="panel-container" ref={containerRef} style={{ touchAction: 'none' }}>
-      <div className="view-toggle-container">
+      <div className="view-toggle-container" style={{left: 8}}>
         <button
           onClick={() => setViewMode('lagrange')}
           className={`view-toggle-btn ${viewMode === 'lagrange' ? 'active' : ''}`}

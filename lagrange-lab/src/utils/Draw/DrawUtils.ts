@@ -1,4 +1,4 @@
-import type { Point } from '../../types/geometry';
+import type { Point } from '../../types/Geometry';
 
 const BASE_RADIUS = 10;
 
