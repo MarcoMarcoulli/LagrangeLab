@@ -3,7 +3,7 @@ import { Line } from '@react-three/drei';
 import { getTorusPoint } from '../../../utils/Math/TorusMath'; 
 
 export function TorusAxes() {
-  const segments = 120;
+  const segments = 200;
 
   // 1. Asse Toroidale (Theta 2 = 0): Il grande cerchio esterno
   const toroidalAxis = useMemo(() => {
@@ -30,7 +30,7 @@ export function TorusAxes() {
       {/* Linea Theta 2 = 0 (Orizzontale/Equatore) */}
       <Line
         points={toroidalAxis}
-        color="#f9f6f5" // Bianco fumo
+        color="#ffffff"
         lineWidth={3}
         transparent={true}
         opacity={1}
@@ -39,7 +39,7 @@ export function TorusAxes() {
       {/* Linea Theta 1 = 0 (Verticale/Sezione) */}
       <Line
         points={poloidalAxis}
-        color="#fbf8f7" // Bianco fumo
+        color="#ffffff"
         lineWidth={3}
         transparent={true}
         opacity={1}

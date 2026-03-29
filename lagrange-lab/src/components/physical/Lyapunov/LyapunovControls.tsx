@@ -15,7 +15,7 @@ type LyapunovControlsProps = {
   
   swarmSize: number;
   onSwarmSizeChange: (value: number) => void;
-  epsilonExponent: number;
+  delta: number;
   onEpsilonChange: (value: number) => void;
 };
 
@@ -32,7 +32,7 @@ export default function LyapunovControls({
   showDoubleOptions,
   swarmSize,
   onSwarmSizeChange,
-  epsilonExponent,
+  delta,
   onEpsilonChange
 }: LyapunovControlsProps) {
   return (
@@ -54,17 +54,17 @@ export default function LyapunovControls({
       {canStartSimulation && !hasSimulations && (
         <div className="sliders-wrapper">
           <div className="control-group">
-            <label className="slider-label lyapunov-color" style={{ width: '130px' }}>
-              Sciame: <strong>{swarmSize}</strong>
+            <label className="slider-label lyapunov">
+              N: <strong>{swarmSize}</strong>
             </label>
-            <input type="range" min="2" max="100" step="1" value={swarmSize} onChange={(e) => onSwarmSizeChange(parseInt(e.target.value))} style={{ accentColor: '#9c27b0' }} />
+            <input type="range" min="2" max="50" step="1" value={swarmSize} onChange={(e) => onSwarmSizeChange(parseInt(e.target.value))} style={{ accentColor: '#b7b7b7' }} />
           </div>
           
           <div className="control-group">
-            <label className="slider-label lyapunov-color" style={{ width: '150px' }}>
-              Delta (ε): <strong>10^{epsilonExponent}</strong>
+            <label className="slider-label lyapunov">
+              Delta: <strong>{delta.toFixed(4)}</strong>
             </label>
-            <input type="range" min="-4" max="-1" step="1" value={epsilonExponent} onChange={(e) => onEpsilonChange(parseInt(e.target.value))} style={{ accentColor: '#9c27b0' }} />
+            <input type="range" min="0.0001" max="0.03" step="0.0001" value={delta} onChange={(e) => onEpsilonChange(parseFloat(e.target.value))} style={{ accentColor: '#bcbbbc' }} />
           </div>
         </div>
       )}

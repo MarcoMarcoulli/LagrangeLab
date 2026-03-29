@@ -52,7 +52,7 @@ export default function LyapunovPanel({
   const [draftColor, setDraftColor] = useState<string>(() => generateColor());
 
   const [swarmSize, setSwarmSize] = useState(10);
-  const [epsilonExponent, setEpsilonExponent] = useState(-6);
+  const [delta, setDelta] = useState(0.0001);
 
   const { viewport, handleWheel, screenToWorld } = useCanvasViewport();
 
@@ -123,7 +123,6 @@ export default function LyapunovPanel({
 
     // 2. ANTEPRIMA DINAMICA (Mentre posizioni le masse)
     if (mass1 && !hasSimulations) {
-      const epsilon = Math.pow(10, epsilonExponent);
       const dx1 = mass1.x - pivot.x;
       const dy1 = mass1.y - pivot.y;
       const L1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
@@ -131,7 +130,7 @@ export default function LyapunovPanel({
 
       // A. Disegna i Cloni (Sotto)
       for (let i = 1; i < swarmSize; i++) {
-        const pTheta1 = (!mass2) ? baseTheta1 + (i * epsilon) : baseTheta1;
+        const pTheta1 = (!mass2) ? baseTheta1 + (i * delta) : baseTheta1;
         const pMass1 = { x: pivot.x + L1 * Math.sin(pTheta1), y: pivot.y + L1 * Math.cos(pTheta1) };
         const previewColor = `hsl(${(i * 137.5) % 360}, 70%, 60%)`;
 
@@ -142,7 +141,7 @@ export default function LyapunovPanel({
           const dx2 = mass2.x - mass1.x;
           const dy2 = mass2.y - mass1.y;
           const L2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-          const baseTheta2 = Math.atan2(dx2, dy2) + (i * epsilon);
+          const baseTheta2 = Math.atan2(dx2, dy2) + (i * delta);
           const pMass2 = { x: pMass1.x + L2 * Math.sin(baseTheta2), y: pMass1.y + L2 * Math.cos(baseTheta2) };
           drawRod(ctx, pMass1, pMass2, previewColor);
           drawMass(ctx, pMass2, previewColor, true, massRatio);
@@ -166,14 +165,13 @@ export default function LyapunovPanel({
     }
 
     ctx.restore();
-  }, [simulations, pivot, mass1, mass2, massRatio, draftColor, viewport, hasSimulations, swarmSize, epsilonExponent]);
+  }, [simulations, pivot, mass1, mass2, massRatio, draftColor, viewport, hasSimulations, swarmSize, delta]);
 
   const handlePlayChaos = useCallback(() => {
     if (!mass1) return;
-    const epsilon = Math.pow(10, epsilonExponent);
-    addChaosSwarm(pivot, mass1, mass2, draftColor, massRatio, swarmSize, epsilon);
+    addChaosSwarm(pivot, mass1, mass2, draftColor, massRatio, swarmSize, delta);
     resetDraft();
-  }, [mass1, mass2, draftColor, massRatio, pivot, addChaosSwarm, resetDraft, swarmSize, epsilonExponent]);
+  }, [mass1, mass2, draftColor, massRatio, pivot, addChaosSwarm, resetDraft, swarmSize, delta]);
 
   const handleReset = useCallback(() => {
     reset();
@@ -198,8 +196,8 @@ export default function LyapunovPanel({
         showDoubleOptions={!!mass2}
         swarmSize={swarmSize}
         onSwarmSizeChange={setSwarmSize}
-        epsilonExponent={epsilonExponent}
-        onEpsilonChange={setEpsilonExponent}
+        delta={delta}
+        onEpsilonChange={setDelta}
         onPlayChaos={handlePlayChaos}
         onTogglePause={togglePause}
         onReset={handleReset}

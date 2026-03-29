@@ -11,6 +11,8 @@ export type PendulumSimulationItem = {
   hamiltonTrace: Point[];
   hamiltonTrace2?: Point[];
   jacobiTrace: Point3D[];
+  poincarePoints: Point[];  // Sezione quando θ1 = 0 (mostra Massa 2)
+  poincarePoints2: Point[]; // Sezione quando θ2 = 0 (mostra Massa 1)
   color: string;
   isSwarm: boolean;
 };

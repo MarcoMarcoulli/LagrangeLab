@@ -5,8 +5,9 @@ import type { PendulumSimulationItem } from '../../simulation/PendulumSimulation
 import LagrangePanel from './Lagrange/LagrangePanel';
 import HamiltonPanel from './Hamilton/HamiltonPanel';
 import JacobiPanel from './Jacobi/JacobiPanel'
+import PoincarePanel from './Poincare/PoincarePanel';
 
-type AbstractViewMode = 'lagrange' | 'hamilton' | 'jacobi';
+type AbstractViewMode = 'lagrange' | 'hamilton' | 'jacobi' | 'poincare';
 
 type AbstractPanelProps = {
   simulations: PendulumSimulationItem[];
@@ -56,11 +57,19 @@ function AbstractPanel({ simulations }: AbstractPanelProps) {
         >
           Jacobi
         </button>
+
+        <button
+          onClick={() => setViewMode('poincare')}
+          className={`view-toggle-btn ${viewMode === 'poincare' ? 'active' : ''}`}
+        >
+          Poincaré
+        </button>
       </div>
 
       {viewMode === 'lagrange' && <LagrangePanel simulations={simulations} />}
       {viewMode === 'hamilton' && <HamiltonPanel simulations={simulations} />}
       {viewMode === 'jacobi' && <JacobiPanel simulations={simulations} />}
+      {viewMode === 'poincare' && <PoincarePanel simulations={simulations} />}
     </div>
   );
 }

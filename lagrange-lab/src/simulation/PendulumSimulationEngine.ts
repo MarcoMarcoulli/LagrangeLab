@@ -29,6 +29,7 @@ const TRACE_POINTS_HAMILTON = 30;
 const TRACE_POINTS_LAGRANGE = 30;
 const TRACE_POINTS_JACOBI = 15;
 const TRACE_POINTS_LYAPUNOV = 25;
+const POINTS_POINCARE = 2000;
 
 const FRAME_DT = 0.016;
 
@@ -155,6 +156,8 @@ export function buildSimulation(
     hamiltonTrace: [],
     hamiltonTrace2: mass2 ? [] : undefined,
     jacobiTrace: [],
+    poincarePoints: [],
+    poincarePoints2: [],
     color,
     isSwarm
   };
@@ -170,9 +173,12 @@ export function stepSimulation(
   const targetEnergy = computeDoublePendulumTotalEnergy(sim.state, sim.parameters);
 
   let currentState = sim.state;
+  const newPoincarePoints: Point[] = [];
+  const newPoincarePoints2: Point[] = [];
 
   // --- UNICO CICLO DI AVANZAMENTO ---
   for (let i = 0; i < substeps; i++) {
+    const oldState = currentState;
     // A. Avanzamento fisico con RK4
     currentState = advanceState(currentState, sim.parameters, dt);
 
@@ -204,6 +210,33 @@ export function stepSimulation(
       console.error(`Physics exploded for simulation ${sim.id}`);
       return null;
     }
+
+    // D. CATTURA SEZIONE DI POINCARÉ (Solo per doppio pendolo)
+    if (isDoubleState(currentState)) {
+      // Funzione helper per mappare l'angolo tra -PI e PI
+      const wrap = (angle: number) => ((angle + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+
+      const th1_old = wrap(oldState[0]);
+      const th1_new = wrap(currentState[0]);
+      const th2_old = wrap(oldState[2]);
+      const th2_new = wrap(currentState[2]);
+
+      // CASO 1: Il primo pendolo incrocia lo zero -> Salviamo la Massa 2
+        if (th1_old < 0 && th1_new >= 0 && (th1_new - th1_old) < Math.PI) {
+          const f = -th1_old / (th1_new - th1_old);
+          const th2_interp = oldState[2] + f * (currentState[2] - oldState[2]);
+          const om2_interp = oldState[3] + f * (currentState[3] - oldState[3]);
+          newPoincarePoints.push({ x: th2_interp, y: om2_interp });
+        }
+
+        // CASO 2: Il secondo pendolo incrocia lo zero -> Salviamo la Massa 1
+        if (th2_old < 0 && th2_new >= 0 && (th2_new - th2_old) < Math.PI) {
+          const f = -th2_old / (th2_new - th2_old);
+          const th1_interp = oldState[0] + f * (currentState[0] - oldState[0]);
+          const om1_interp = oldState[1] + f * (currentState[1] - oldState[1]);
+          newPoincarePoints2.push({ x: th1_interp, y: om1_interp });
+        }
+    }
   }
 
   // --- CALCOLO DEI PUNTI PER LE SCIE (Dopo che la fisica è stabile) ---
@@ -231,6 +264,8 @@ export function stepSimulation(
         : sim.hamiltonTrace2,
     lagrangeTrace: [...sim.lagrangeTrace, configurationPoint].slice(-TRACE_POINTS_LAGRANGE),
     jacobiTrace: [...sim.jacobiTrace, currentTorusPoint].slice(-TRACE_POINTS_JACOBI),
+    poincarePoints: [...(sim.poincarePoints || []), ...newPoincarePoints].slice(-POINTS_POINCARE),
+    poincarePoints2: [...(sim.poincarePoints2 || []), ...newPoincarePoints2].slice(-POINTS_POINCARE),
   };
 }
 
@@ -273,8 +308,8 @@ export function buildChaosSwarm(
       id: crypto.randomUUID(), // Ogni clone deve avere il suo ID unico
       state: newState,
       color: uniqueColor,
-      // Se vuoi che il leader sia distinguibile, puoi modificare il colore qui
       newtonTrace: [],
+      poincarePoints: [],
     });
   }
 

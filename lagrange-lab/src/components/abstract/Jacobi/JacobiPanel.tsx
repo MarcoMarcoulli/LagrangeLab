@@ -23,6 +23,9 @@ function JacobiPanel({ simulations }: JacobiPanelProps) {
   // the torus should be colored only if there is one double pendulum simulating
   const activeSim = doublePendulumSims.length === 1 ? doublePendulumSims[0] : null;
 
+  const numDoubleSims = simulations.filter(sim => isDoubleState(sim.state)).length;
+  const useColorfulMapStyle = numDoubleSims === 1;
+
   const totalEnergy = useMemo(() =>
   {
     if (!activeSim || !isDoubleState(activeSim.state)) return null;
@@ -47,6 +50,8 @@ function JacobiPanel({ simulations }: JacobiPanelProps) {
           key={activeSim ? activeSim.id : 'empty'} 
           parameters={activeSim ? activeSim.parameters : null} 
           totalEnergy={totalEnergy}
+
+          useColorfulMapStyle={useColorfulMapStyle}
         />
         <TorusAxes />
 

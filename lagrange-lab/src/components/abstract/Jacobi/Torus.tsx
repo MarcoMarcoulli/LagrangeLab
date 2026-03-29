@@ -8,13 +8,16 @@ import { computeDoublePendulumPotential } from '../../../simulation/models/Doubl
 type TorusProps = {
   parameters?: PendulumParameters | null;
   totalEnergy?: number | null;
+  useColorfulMapStyle: boolean;
 };
 
-export function Torus({ parameters, totalEnergy }: TorusProps) {
+export function Torus({ parameters, totalEnergy, useColorfulMapStyle }: TorusProps) {
   
-  const curvatureTexture = useMemo(() => {
-    if (!parameters || totalEnergy === null) return null;
-
+  const { curvatureTexture, gridTexture } = useMemo(() => {
+    if (!parameters || totalEnergy === undefined || totalEnergy === null)
+    {
+      return { curvatureTexture: null, gridTexture: null };
+    }
     const { length1, gravity, massRatio } = parameters;
     const length2 = parameters.length2 ?? 0;
     const m1 = 1;
@@ -44,7 +47,8 @@ export function Torus({ parameters, totalEnergy }: TorusProps) {
         const thickness = Math.max(0.2, Math.abs(totalEnergy!) * 0.03);
         const lineIntensity = Math.exp(-Math.pow(W / thickness, 2));
 
-        if (lineIntensity > 0.85) {
+        if (lineIntensity > 0.85)
+        {
           // Se la vedi ancora troppo spessa, alza 0.5 a 0.7 o 0.8
           // Se non la vedi, abbassa 0.5 a 0.3
           data[stride] = 0;
@@ -95,40 +99,53 @@ export function Torus({ parameters, totalEnergy }: TorusProps) {
       }
     }
 
-    const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.magFilter = THREE.LinearFilter; 
-    texture.anisotropy = 16;
-    texture.needsUpdate = true; 
-    return texture;
+    const colorfulTexture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
+    colorfulTexture.colorSpace = THREE.SRGBColorSpace;
+    colorfulTexture.magFilter = THREE.LinearFilter; 
+    colorfulTexture.anisotropy = 16;
+    colorfulTexture.needsUpdate = true; 
 
-  }, [parameters, totalEnergy ? Math.round(totalEnergy * 1000) : null]);
+    return{ 
+      curvatureTexture: colorfulTexture, 
+    };
+  }, [parameters, totalEnergy ? Math.round(totalEnergy * 1000) : null, useColorfulMapStyle]);
+
+  // 1. Texture principale
+  const mainMap = useColorfulMapStyle ? curvatureTexture : gridTexture;
+
+  const baseColor = useColorfulMapStyle ? "#9b3333" : "#430b0b";
+
+  // 3. EMISSIVE: Questa è la chiave per la luce costante
+  // Se siamo in modalità griglia, l'emissive deve essere lo stesso blu del baseColor
+  const emissiveColor = useColorfulMapStyle 
+    ? (curvatureTexture ? "#ffffff" : "#000000") 
+    : "#06102a"; // Blu costante per la griglia
+
+  const emissiveIntensity = useColorfulMapStyle ? 0.6 : 0.1;
 
   return (
     <mesh>
       <torusGeometry args={[TORUS_R, TORUS_r, 64, 100]} />
       
       <meshPhysicalMaterial 
-        color={curvatureTexture ? "#ffffff" : "#0d47a1"} 
-        map={curvatureTexture}
+        color={baseColor}
+        map={mainMap}
         
-        roughness={0.4}
-        metalness={0.2}
-        // Emissive rende i colori vibranti anche nelle zone d'ombra
-        emissive={curvatureTexture ? "#001122" : "#000000"}
-        emissiveIntensity={0.5}
-        
+        emissiveMap={mainMap} 
+        emissive={emissiveColor}
+        emissiveIntensity={emissiveIntensity}
+
         transparent={true}
-        opacity={1.0}  
+        opacity={useColorfulMapStyle ? 1 : 0.8}  
         transmission={0.0}
         thickness={0.5}
       />
       
       <Edges
         threshold={0.1}
-        color={curvatureTexture ? "#ffffff" : "#64ffda"}
+        color={useColorfulMapStyle ? "#4a4444" : "#534cb0"}
         transparent
-        opacity={curvatureTexture ? 0.15 : 0.8}
+        opacity={useColorfulMapStyle ? 0.9 : 0.6}
       />
     </mesh>
   );
