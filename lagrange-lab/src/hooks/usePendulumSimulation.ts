@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Point } from '../types/Geometry';
 import type { PendulumSimulationItem } from '../simulation/PendulumSimulationItem';
 import { buildSimulation, stepSimulation, buildChaosSwarm } from '../simulation/PendulumSimulationEngine';
+import { PIXELS_PER_METER } from '../utils/Math/PhysicsConstants';
 
 export function usePendulumSimulation() {
   const [isPaused, setIsPaused] = useState(false);
@@ -16,9 +17,11 @@ export function usePendulumSimulation() {
       mass1: Point,
       mass2: Point | null,
       color: string,
-      massRatio: number = 1
+      massRatio: number = 1,
+      gravity : number
     ) => {
-      const newSimulation = buildSimulation(pivot, mass1, mass2, color, massRatio);
+      const scaledG = gravity * PIXELS_PER_METER;
+      const newSimulation = buildSimulation(pivot, mass1, mass2, color, massRatio, false, scaledG);
       setSimulations(prev => [...prev, newSimulation]);
     }, []);
   
@@ -30,9 +33,11 @@ export function usePendulumSimulation() {
       baseColor: string,
       massRatio: number,
       swarmSize: number,
-      epsilon: number
+      epsilon: number,
+      gravity: number
     ) => {
-      const newSwarm = buildChaosSwarm(pivot, mass1, mass2, baseColor, massRatio, swarmSize, epsilon);
+      const scaledG = gravity * PIXELS_PER_METER;
+      const newSwarm = buildChaosSwarm(pivot, mass1, mass2, baseColor, massRatio, swarmSize, epsilon, scaledG);
       
       setSimulations(prev => [...prev, ...newSwarm]);
     }, []);
@@ -82,6 +87,7 @@ export function usePendulumSimulation() {
 
   return {
     simulations,
+    setSimulations,
     hasSimulations,
     isPaused,
     addSimulation,

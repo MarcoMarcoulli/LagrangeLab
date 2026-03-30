@@ -1,4 +1,4 @@
-import { ControlBarContainer, InstructionLabel, ActiveSimulationButtons, MassRatioControl } from '../PhysicalControls';
+import { ControlBarContainer, InstructionLabel, ActiveSimulationButtons, MassRatioControl, GravityControl } from '../PhysicalControls';
 import '../../../styles/Controls.css';
 
 type LyapunovControlsProps = {
@@ -17,6 +17,9 @@ type LyapunovControlsProps = {
   onSwarmSizeChange: (value: number) => void;
   delta: number;
   onEpsilonChange: (value: number) => void;
+
+  gravity: number; 
+  onGravityChange: (value: number) => void;
 };
 
 export default function LyapunovControls({
@@ -33,7 +36,9 @@ export default function LyapunovControls({
   swarmSize,
   onSwarmSizeChange,
   delta,
-  onEpsilonChange
+  onEpsilonChange,
+  gravity,
+  onGravityChange
 }: LyapunovControlsProps) {
   return (
     <ControlBarContainer>
@@ -72,6 +77,8 @@ export default function LyapunovControls({
       {showDoubleOptions && !hasSimulations && (
         <MassRatioControl massRatio={massRatio} onChange={onMassRatioChange} />
       )}
+
+      <GravityControl gravity={gravity} onChange={onGravityChange} />
     </ControlBarContainer>
   );
 }

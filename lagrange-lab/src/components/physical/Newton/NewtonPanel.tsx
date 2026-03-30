@@ -25,6 +25,8 @@ type NewtonPanelProps = {
   simulations: PendulumSimulationItem[];
   hasSimulations: boolean;
   isPaused: boolean;
+  gravity: number;
+  onGravityChange: (newGravity: number) => void;
   addSimulation: (
     pivot: Point,
     mass1: Point,
@@ -40,6 +42,8 @@ function NewtonPanel({
   simulations,
   hasSimulations,
   isPaused,
+  gravity,      
+  onGravityChange,
   addSimulation,
   togglePause,
   reset,
@@ -173,6 +177,8 @@ function NewtonPanel({
         onPlay={handlePlay}
         onTogglePause={togglePause}
         onReset={handleReset}
+        gravity={gravity}
+        onGravityChange={onGravityChange}
       />
 
       <CanvasPanel

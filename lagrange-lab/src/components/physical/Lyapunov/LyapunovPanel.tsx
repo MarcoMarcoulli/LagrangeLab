@@ -23,6 +23,8 @@ type LyapunovPanelProps = {
   simulations: PendulumSimulationItem[];
   hasSimulations: boolean;
   isPaused: boolean;
+  gravity: number;
+  onGravityChange: (newGravity: number) => void;
   addChaosSwarm: (
     pivot: Point,
     mass1: Point,
@@ -40,6 +42,8 @@ export default function LyapunovPanel({
   simulations,
   hasSimulations,
   isPaused,
+  gravity,      
+  onGravityChange,
   addChaosSwarm,
   togglePause,
   reset,
@@ -201,6 +205,8 @@ export default function LyapunovPanel({
         onPlayChaos={handlePlayChaos}
         onTogglePause={togglePause}
         onReset={handleReset}
+        gravity={gravity}           
+        onGravityChange={onGravityChange}
       />
 
       <CanvasPanel

@@ -129,7 +129,8 @@ export function buildSimulation(
   mass2: Point | null,
   color: string,
   massRatio: number = 1,
-  isSwarm: boolean = false
+  isSwarm: boolean = false,
+  gravity: number = 9.81 * 700
 ): PendulumSimulationItem
 {
   let initialState: PendulumState;
@@ -145,6 +146,8 @@ export function buildSimulation(
     initialState = buildInitialDoublePendulumState(pivot, mass1, mass2);
     initialParams = buildDoublePendulumParameters(pivot, mass1, mass2, massRatio);
   }
+
+  initialParams.gravity = gravity;
 
   return{
     id: crypto.randomUUID(),
@@ -280,10 +283,11 @@ export function buildChaosSwarm(
   baseColor: string,
   massRatio: number,
   swarmSize: number,
-  epsilon: number
+  epsilon: number,
+  gravity: number
 ): PendulumSimulationItem[] {
   // 1. Creiamo il "Leader" (quello che l'utente ha disegnato)
-  const leader = buildSimulation(pivot, mass1, mass2, baseColor, massRatio, true);
+  const leader = buildSimulation(pivot, mass1, mass2, baseColor, massRatio, true, gravity);
   
   const swarm: PendulumSimulationItem[] = [];
 
@@ -310,6 +314,7 @@ export function buildChaosSwarm(
       color: uniqueColor,
       newtonTrace: [],
       poincarePoints: [],
+      poincarePoints2: [],
     });
   }
 

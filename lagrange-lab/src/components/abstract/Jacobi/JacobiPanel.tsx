@@ -32,7 +32,7 @@ function JacobiPanel({ simulations }: JacobiPanelProps) {
 
     return computeDoublePendulumTotalEnergy(activeSim.state, activeSim.parameters);
     
-  }, [activeSim?.id]);
+  }, [activeSim?.id, activeSim?.parameters.gravity]);
 
   return (
     <div className="panel-container" style={{ touchAction: 'none' }}>

@@ -12,6 +12,8 @@ type PhysicalPanelProps = {
   simulations: PendulumSimulationItem[];
   hasSimulations: boolean;
   isPaused: boolean;
+  gravity: number;
+  onGravityChange: (newGravity: number) => void;
   addSimulation: (
     pivot: Point, 
     mass1: Point, 
@@ -36,6 +38,8 @@ function PhysicalPanel({
   simulations,
   hasSimulations,
   isPaused,
+  gravity,
+  onGravityChange,
   addSimulation,
   addChaosSwarm,
   togglePause,
@@ -95,6 +99,8 @@ function PhysicalPanel({
           simulations={simulations}
           hasSimulations={hasSimulations}
           isPaused={isPaused}
+          gravity={gravity} 
+          onGravityChange={onGravityChange}
           addSimulation={addSimulation}
           togglePause={togglePause}
           reset={reset}
@@ -106,6 +112,8 @@ function PhysicalPanel({
           simulations={simulations}
           hasSimulations={hasSimulations}
           isPaused={isPaused}
+          gravity={gravity}             
+          onGravityChange={onGravityChange}
           addChaosSwarm={addChaosSwarm}
           togglePause={togglePause}
           reset={reset}

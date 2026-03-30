@@ -63,3 +63,24 @@ export function MassRatioControl({
     </div>
   );
 }
+
+export function GravityControl({ 
+  gravity, onChange 
+}: { 
+  gravity: number; onChange: (v: number) => void;
+}) {
+  return (
+    <div className="sliders-wrapper">
+      <label className="slider-label" style={{ width: '80px' }}>
+        Gravità: <strong>{gravity.toFixed(2)}</strong>
+      </label>
+      
+      <input
+        style={{ width: '100px', accentColor: '#ff4757' }}
+        type="range" min="0.1" max="30" step="0.1" 
+        value={gravity} 
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+      />
+    </div>
+  );
+}

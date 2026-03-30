@@ -1,15 +1,17 @@
-import { ControlBarContainer, InstructionLabel, ActiveSimulationButtons, MassRatioControl } from '../PhysicalControls';
+import { ControlBarContainer, InstructionLabel, ActiveSimulationButtons, MassRatioControl, GravityControl } from '../PhysicalControls';
 import '../../../styles/Controls.css';
 
 type NewtonControlsProps = {
   instructionMessage: string; canStartSimulation: boolean; hasSimulations: boolean;
   isPaused: boolean; onPlay: () => void; onTogglePause: () => void; onReset: () => void;
   massRatio: number; onMassRatioChange: (value: number) => void; showDoubleOptions: boolean;
+  gravity: number; 
+  onGravityChange: (value: number) => void;
 };
 
 export default function NewtonControls({
   instructionMessage, canStartSimulation, hasSimulations, isPaused,
-  onPlay, onTogglePause, onReset, massRatio, onMassRatioChange, showDoubleOptions
+  onPlay, onTogglePause, onReset, massRatio, onMassRatioChange, showDoubleOptions, gravity, onGravityChange
 }: NewtonControlsProps) {
   return (
     <ControlBarContainer>
@@ -31,6 +33,8 @@ export default function NewtonControls({
       {showDoubleOptions && !hasSimulations && (
         <MassRatioControl massRatio={massRatio} onChange={onMassRatioChange} />
       )}
+
+      <GravityControl gravity={gravity} onChange={onGravityChange} />
     </ControlBarContainer>
   );
 }
