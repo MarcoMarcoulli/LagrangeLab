@@ -64,14 +64,18 @@
   }
 
   .view-toggle-container {
-    bottom: auto; 
-    top: 10px; 
-    
+    bottom: 12px;
+    top: auto;
     left: 50%;
     transform: translateX(-50%);
-    width: 90%; 
+    width: 50%; 
     justify-content: center; 
     z-index: 1000;
+  }
+
+  .right-panel .view-toggle-container {
+    bottom: auto;
+    top: 10px;
   }
 
   .view-toggle-btn {
