@@ -84,6 +84,8 @@
     bottom: auto;
     top: 10px;
     left : 10px;
+    right: auto;
+    margin: 0;
   }
 
   .view-toggle-btn {
