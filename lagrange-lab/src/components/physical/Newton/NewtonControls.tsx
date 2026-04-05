@@ -1,5 +1,6 @@
-import { ControlBarContainer, InstructionLabel, ActiveSimulationButtons, MassRatioControl, GravityControl } from '../PhysicalControls';
+import { ControlBarContainer, InstructionLabel, PauseResumeButton, ResetButton, RestartButton, MassRatioControl, GravityControl } from '../PhysicalControls';
 import '../../../styles/Controls.css';
+import TraceLengthSlider from '../../TraceLengthSlider';
 
 type NewtonControlsProps = {
   instructionMessage: string;
@@ -15,14 +16,30 @@ type NewtonControlsProps = {
   showDoubleOptions: boolean;
   gravity: number;
   onGravityChange: (value: number) => void;
+  traceLength: number;
+  onTraceLengthChange: (value: number) => void;
 };
 
 export default function NewtonControls({
-  instructionMessage, canStartSimulation, hasSimulations, isPaused,
-  onPlay, onTogglePause, onReset, onRestart, massRatio, onMassRatioChange, showDoubleOptions, gravity, onGravityChange
+  instructionMessage,
+  canStartSimulation,
+  hasSimulations,
+  isPaused,
+  onPlay,
+  onTogglePause,
+  onReset,
+  onRestart,
+  massRatio,
+  onMassRatioChange,
+  showDoubleOptions,
+  gravity,
+  onGravityChange,
+  traceLength,
+  onTraceLengthChange
 }: NewtonControlsProps) {
   const showGravitySlider = (!hasSimulations && !showDoubleOptions) || (hasSimulations && !canStartSimulation);
-  
+  const showTraceSlider = !(hasSimulations && canStartSimulation);
+
   return (
     <ControlBarContainer>
       <InstructionLabel text={instructionMessage} />
@@ -36,15 +53,22 @@ export default function NewtonControls({
         </button>
       )}
 
+      {(canStartSimulation || hasSimulations) &&
+        <ResetButton 
+            onReset={onReset} 
+        />
+      }
+
       {hasSimulations && (
         <>
-        <ActiveSimulationButtons isPaused={isPaused} onTogglePause={onTogglePause} onReset={onReset} />
-        <button 
-            onClick={onRestart} 
-            className="action-btn btn-restart"
-          >
-            Restart
-          </button>
+          <PauseResumeButton 
+            isPaused={isPaused} 
+            onTogglePause={onTogglePause} 
+          />
+
+          <RestartButton 
+            onRestart={onRestart} 
+          />
         </>
       )}
 
@@ -54,6 +78,14 @@ export default function NewtonControls({
 
       {showGravitySlider && (
         <GravityControl gravity={gravity} onChange={onGravityChange} />
+      )}
+
+      {showTraceSlider && (
+        <TraceLengthSlider
+          value={traceLength}
+          onChange={onTraceLengthChange}
+          style={{ display: 'flex', alignItems: 'center' }}
+        />
       )}
     </ControlBarContainer>
   );

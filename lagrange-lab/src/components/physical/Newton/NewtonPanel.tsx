@@ -56,6 +56,7 @@ function NewtonPanel({
   const [mass2, setMass2] = useState<Point | null>(null);
   const [massRatio, setMassRatio] = useState(1);
   const [draftColor, setDraftColor] = useState<string>(() => generateColor());
+  const [traceLength, setTraceLength] = useState(50);
 
   const { viewport, handleWheel, screenToWorld } = useCanvasViewport();
 
@@ -72,7 +73,7 @@ function NewtonPanel({
     }
 
     if (!mass2) {
-      return 'Press Play to start a simple pendulum or click to place the second mass';
+      return 'Start simulation or click to place the second mass';
     }
 
     return 'Press Play to start the double pendulum';
@@ -109,6 +110,7 @@ function NewtonPanel({
     for (const simulation of simulations)
     {
       const { state, parameters, newtonTrace, color } = simulation;
+      const slicedTrace = traceLength === 0 ? [] : newtonTrace.slice(-traceLength);
 
       if (isDoubleState(state)) 
       {
@@ -119,7 +121,7 @@ function NewtonPanel({
           pivot,
           m1,
           m2,
-          newtonTrace,
+          slicedTrace,
           parameters.massRatio ?? 1,
           color
         );
@@ -127,7 +129,7 @@ function NewtonPanel({
       else
       {
         const mPos = computeMass1Position(pivot, state, parameters);
-        renderSimplePendulumScene(ctx, pivot, mPos, newtonTrace, color);
+        renderSimplePendulumScene(ctx, pivot, mPos, newtonTrace.slice(-traceLength), color);
       }
     }
 
@@ -144,7 +146,7 @@ function NewtonPanel({
     }
 
     ctx.restore();
-  }, [simulations, pivot, mass1, mass2, massRatio, draftColor, viewport]);
+  }, [simulations, pivot, mass1, mass2, massRatio, draftColor, viewport, traceLength]);
 
   const handlePlay = useCallback(() => {
     if (!mass1) {
@@ -182,6 +184,8 @@ function NewtonPanel({
         onRestart={restart}
         gravity={gravity}
         onGravityChange={onGravityChange}
+        traceLength={traceLength}
+        onTraceLengthChange={setTraceLength}
       />
 
       <CanvasPanel
@@ -195,7 +199,7 @@ function NewtonPanel({
         src="/images/newton.png"
         alt="Isaac Newton"
         className="physicist-image"
-        style={{ left: 0 }} // Specifichiamo il lato qui se non è nel CSS
+        style={{ left: 0 }}
       />
     </div>
   );

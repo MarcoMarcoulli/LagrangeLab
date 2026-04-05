@@ -24,14 +24,10 @@ import { isDoubleState } from '../utils/TypeGuards';
 import { computeDoublePendulumTotalEnergy, computeDoublePendulumPotential, computeDoublePendulumKineticEnergy } from './models/DoublePendulum';
 import { getTorusPoint } from '../utils/Math/TorusMath';
 
-const TRACE_POINTS_NEWTON = 45;
-const TRACE_POINTS_HAMILTON = 30;
-const TRACE_POINTS_LAGRANGE = 30;
-const TRACE_POINTS_JACOBI = 15;
-const TRACE_POINTS_LYAPUNOV = 25;
-const POINTS_POINCARE = 2000;
+const MAX_TRACE_HISTORY = 100;
+const POINTS_POINCARE = 5000;
 
-const FRAME_DT = 0.016;
+export const FRAME_DT = 0.016;
 
 function addStates(a: PendulumState, b: PendulumState): PendulumState {
   const result = new Float64Array(a.length);
@@ -255,19 +251,17 @@ export function stepSimulation(
   const currentPos = isDoubleState(currentState)
     ? computeMass2Position(sim.pivot, currentState, sim.parameters)
     : computeSimplePos(sim.pivot, currentState, sim.parameters);
-
-  const physicalTraceLimit = sim.isSwarm ? TRACE_POINTS_LYAPUNOV : TRACE_POINTS_NEWTON;
-
+  
   return {
     ...sim,
     state: currentState,
-    newtonTrace: [...sim.newtonTrace, currentPos].slice(-physicalTraceLimit),
-    hamiltonTrace: [...sim.hamiltonTrace, phasePoint].slice(-TRACE_POINTS_HAMILTON),
-    hamiltonTrace2: (phasePoint2 && sim.hamiltonTrace2) 
-        ? [...sim.hamiltonTrace2, phasePoint2].slice(-TRACE_POINTS_HAMILTON) 
+    newtonTrace: [...sim.newtonTrace, currentPos].slice(-MAX_TRACE_HISTORY),
+    hamiltonTrace: [...sim.hamiltonTrace, phasePoint].slice(-MAX_TRACE_HISTORY),
+    hamiltonTrace2: (phasePoint2 && sim.hamiltonTrace2)
+        ? [...sim.hamiltonTrace2, phasePoint2].slice(-MAX_TRACE_HISTORY)
         : sim.hamiltonTrace2,
-    lagrangeTrace: [...sim.lagrangeTrace, configurationPoint].slice(-TRACE_POINTS_LAGRANGE),
-    jacobiTrace: [...sim.jacobiTrace, currentTorusPoint].slice(-TRACE_POINTS_JACOBI),
+    lagrangeTrace: [...sim.lagrangeTrace, configurationPoint].slice(-MAX_TRACE_HISTORY),
+    jacobiTrace: [...sim.jacobiTrace, currentTorusPoint].slice(-MAX_TRACE_HISTORY),
     poincarePoints: [...(sim.poincarePoints || []), ...newPoincarePoints].slice(-POINTS_POINCARE),
     poincarePoints2: [...(sim.poincarePoints2 || []), ...newPoincarePoints2].slice(-POINTS_POINCARE),
   };

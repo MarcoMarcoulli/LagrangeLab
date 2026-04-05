@@ -1,5 +1,5 @@
 import '../../../styles/Panel.css';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { TrackballControls } from '@react-three/drei';
 import type { PendulumSimulationItem } from '../../../simulation/PendulumSimulationItem';
@@ -10,12 +10,15 @@ import { TorusAxes } from './TorusAxes';
 import { JacobiTrace } from './JacobiTrace';
 
 import { computeDoublePendulumTotalEnergy } from '../../../simulation/models/DoublePendulum';
+import TraceLengthSlider from '../../TraceLengthSlider';
 
 type JacobiPanelProps = {
   simulations: PendulumSimulationItem[];
 };
 
-function JacobiPanel({ simulations }: JacobiPanelProps) {
+function JacobiPanel({ simulations }: JacobiPanelProps)
+{
+  const [traceLength, setTraceLength] = useState(50);
 
   // filter only double pendulums
   const doublePendulumSims = simulations.filter(sim => isDoubleState(sim.state));
@@ -36,7 +39,11 @@ function JacobiPanel({ simulations }: JacobiPanelProps) {
 
   return (
     <div className="panel-container" style={{ touchAction: 'none' }}>
-      
+      <TraceLengthSlider
+        value={traceLength} 
+        onChange={setTraceLength} 
+        style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }} 
+      />
       <Canvas camera={{ position: [2, -8, 6], fov: 45 }}>
 
         <ambientLight intensity={0.3} />
@@ -58,8 +65,8 @@ function JacobiPanel({ simulations }: JacobiPanelProps) {
         {simulations.map((sim) => (
           <JacobiTrace
             key={sim.id} 
-            // Usiamo la traccia 3D pre-calcolata dal motore fisico!
-            trace={sim.jacobiTrace} 
+            fullTrace={sim.jacobiTrace}
+            visibleLimit={traceLength}
             color={sim.color}
           />
         ))}

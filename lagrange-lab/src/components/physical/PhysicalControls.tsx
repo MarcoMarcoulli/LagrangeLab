@@ -18,27 +18,50 @@ export function InstructionLabel({ text }: { text: string }) {
   );
 }
 
-export function ActiveSimulationButtons({ 
-  isPaused, onTogglePause, onReset 
+export function PauseResumeButton({ 
+  isPaused, 
+  onTogglePause 
 }: { 
-  isPaused: boolean; onTogglePause: () => void; onReset: () => void;
+  isPaused: boolean; 
+  onTogglePause: () => void; 
 }) {
   return (
-    <div style={{ display: 'flex', gap: 8 }}>
-      <button
-        onClick={onTogglePause}
-        className={`action-btn ${isPaused ? 'btn-resume' : 'btn-pause'}`}
-      >
-        {isPaused ? 'Resume' : 'Pause'}
-      </button>
-      
-      <button
-        onClick={onReset}
-        className="action-btn btn-reset"
-      >
-        Reset
-      </button>
-    </div>
+    <button
+      onClick={onTogglePause}
+      className={`action-btn ${isPaused ? 'btn-resume' : 'btn-pause'}`}
+    >
+      {isPaused ? 'Resume' : 'Pause'}
+    </button>
+  );
+}
+
+export function ResetButton({ 
+  onReset 
+}: { 
+  onReset: () => void; 
+}) {
+  return (
+    <button
+      onClick={onReset}
+      className="action-btn btn-reset"
+    >
+      Reset
+    </button>
+  );
+}
+
+export function RestartButton({ 
+  onRestart 
+}: { 
+  onRestart: () => void; 
+}) {
+  return (
+    <button
+      onClick={onRestart}
+      className="action-btn btn-restart"
+    >
+      Restart
+    </button>
   );
 }
 

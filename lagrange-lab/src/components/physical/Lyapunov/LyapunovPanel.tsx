@@ -17,6 +17,7 @@ import { computeMass1Position } from '../../../simulation/models/PendulumCommon'
 import { computeMass2Position } from '../../../simulation/models/DoublePendulum';
 import { isDoubleState } from '../../../utils/TypeGuards';
 import { generateColor } from '../../../utils/Draw/ColorUtils';
+import { FRAME_DT } from '../../../simulation/PendulumSimulationEngine';
 
 type LyapunovPanelProps = {
   simulations: PendulumSimulationItem[];
@@ -55,6 +56,8 @@ export default function LyapunovPanel({
   const [mass2, setMass2] = useState<Point | null>(null);
   const [massRatio, setMassRatio] = useState(1);
   const [draftColor, setDraftColor] = useState<string>(() => generateColor());
+  const [traceLength, setTraceLength] = useState(2.4);
+  const pointsToKeep = Math.floor(traceLength / FRAME_DT);
 
   const [swarmSize, setSwarmSize] = useState(10);
   const [delta, setDelta] = useState(0.0001);
@@ -119,13 +122,14 @@ export default function LyapunovPanel({
       }
 
       const leader = simulations[0];
+      const leaderSlicedTrace = pointsToKeep === 0 ? [] : leader.newtonTrace.slice(-pointsToKeep);
       if (isDoubleState(leader.state)) {
         const m1 = computeMass1Position(pivot, leader.state, leader.parameters);
         const m2 = computeMass2Position(pivot, leader.state, leader.parameters);
-        renderDoublePendulumScene(ctx, pivot, m1, m2, leader.newtonTrace, leader.parameters.massRatio ?? 1, leader.color);
+        renderDoublePendulumScene(ctx, pivot, m1, m2, leaderSlicedTrace, leader.parameters.massRatio ?? 1, leader.color);
       } else {
         const mPos = computeMass1Position(pivot, leader.state, leader.parameters);
-        renderSimplePendulumScene(ctx, pivot, mPos, leader.newtonTrace, leader.color);
+        renderSimplePendulumScene(ctx, pivot, mPos, leaderSlicedTrace, leader.color);
       }
     }
 
@@ -212,6 +216,8 @@ export default function LyapunovPanel({
         onRestart={restart}
         gravity={gravity}           
         onGravityChange={onGravityChange}
+        traceLength={traceLength}
+        onTraceLengthChange={setTraceLength}
       />
 
       <CanvasPanel

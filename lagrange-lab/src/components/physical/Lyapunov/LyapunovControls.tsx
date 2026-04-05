@@ -1,5 +1,6 @@
-import { ControlBarContainer, InstructionLabel, ActiveSimulationButtons, MassRatioControl, GravityControl } from '../PhysicalControls';
+import { ControlBarContainer, InstructionLabel, PauseResumeButton, ResetButton, RestartButton, MassRatioControl, GravityControl } from '../PhysicalControls';
 import '../../../styles/Controls.css';
+import TraceLengthSlider from '../../TraceLengthSlider';
 
 type LyapunovControlsProps = {
   instructionMessage: string;
@@ -21,6 +22,9 @@ type LyapunovControlsProps = {
 
   gravity: number; 
   onGravityChange: (value: number) => void;
+
+  traceLength: number;
+  onTraceLengthChange: (value: number) => void;
 };
 
 export default function LyapunovControls({
@@ -40,7 +44,9 @@ export default function LyapunovControls({
   delta,
   onEpsilonChange,
   gravity,
-  onGravityChange
+  onGravityChange,
+  traceLength,
+  onTraceLengthChange
 }: LyapunovControlsProps) {
   return (
     <ControlBarContainer>
@@ -56,12 +62,19 @@ export default function LyapunovControls({
             </button>
           )}
 
+          {(canStartSimulation || hasSimulations) && (
+            <ResetButton onReset={onReset} />
+          )}
+
           {hasSimulations && (
             <>
-              <ActiveSimulationButtons isPaused={isPaused} onTogglePause={onTogglePause} onReset={onReset} />
-              <button onClick={onRestart} className="action-btn btn-restart">
-                Restart
-              </button>
+              <PauseResumeButton 
+                isPaused={isPaused} 
+                onTogglePause={onTogglePause} 
+              />
+              <RestartButton 
+                onRestart={onRestart} 
+              />
             </>
           )}
         </div>
@@ -91,6 +104,11 @@ export default function LyapunovControls({
       )}
 
       <GravityControl gravity={gravity} onChange={onGravityChange} />
+      {!(hasSimulations && canStartSimulation) &&<TraceLengthSlider
+        value={traceLength}
+        onChange={onTraceLengthChange}
+        style={{ display: 'flex', alignItems: 'center' }}
+      />}
     </ControlBarContainer>
   );
 }
