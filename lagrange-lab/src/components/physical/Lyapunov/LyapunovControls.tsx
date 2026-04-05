@@ -58,7 +58,7 @@ export default function LyapunovControls({
 
         <div className="buttons-row">
           {canStartSimulation && !hasSimulations && (
-            <button className="action-btn btn-chaos" onClick={onPlayChaos}>
+            <button className="action-btn btn-play" onClick={onPlayChaos}>
               Play
             </button>
           )}

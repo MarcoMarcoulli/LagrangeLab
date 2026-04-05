@@ -71,11 +71,6 @@
 .btn-reset { background-color: #e53935; }
 .btn-restart { background-color: #5e35b1; }
 
-.btn-chaos {
-  background-color: #8e24aa;
-  box-shadow: 0 0 12px rgba(156, 39, 176, 0.6);
-}
-
 .sliders-wrapper {
   display: flex;
   flex-direction: column;
