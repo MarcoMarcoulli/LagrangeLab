@@ -59,6 +59,7 @@ export function usePendulumSimulation() {
       state: new Float64Array(sim.initialState),
       newtonTrace: [],
       lyapunovTrace: [],
+      lagrangeTrace: [],
       hamiltonTrace: [],
       hamiltonTrace2: sim.hamiltonTrace2 ? [] : undefined,
       jacobiTrace: [],

@@ -16,8 +16,6 @@ type PoincarePanelProps = {
 
 function PoincarePanel({ simulations }: PoincarePanelProps) {
 
-  // Per Poincaré, l'asse X sarà solitamente theta2 (da -PI a PI)
-  // e l'asse Y sarà omega2. Usiamo omegaMax per lo zoom verticale sull'energia cinetica.
   const [omegaMax, setOmegaMax] = useState(40);
   const [viewMass, setViewMass] = useState<1 | 2>(2);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -34,7 +32,7 @@ function PoincarePanel({ simulations }: PoincarePanelProps) {
       
       setOmegaMax(prev => {
         const next = prev + (prev * zoomSensitivity * direction);
-        return Math.max(3, next); // Evitiamo di zoomare all'infinito
+        return Math.max(3, next); 
       });
     };
 
@@ -49,11 +47,10 @@ function PoincarePanel({ simulations }: PoincarePanelProps) {
     (ctx: CanvasRenderingContext2D, width: number, height: number) => {
       ctx.clearRect(0, 0, width, height);
 
-      // Disegniamo gli assi (tipicamente theta2 su X, omega2 su Y)
       drawPoincareAxes(ctx, width, height, omegaMax, viewMass);
 
-      for (const sim of simulations) {
-        // Le sezioni di Poincaré hanno senso matematico visivo soprattutto per il doppio pendolo
+      for (const sim of simulations)
+      {
         if (!isDoubleState(sim.state)) continue;
 
         const pointsToDraw = viewMass === 2 ? sim.poincarePoints : sim.poincarePoints2;
