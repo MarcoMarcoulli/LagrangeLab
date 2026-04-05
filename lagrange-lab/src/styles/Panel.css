@@ -76,6 +76,7 @@
   .right-panel .view-toggle-container {
     bottom: auto;
     top: 10px;
+    left: 20%;
   }
 
   .view-toggle-btn {
