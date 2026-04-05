@@ -67,7 +67,7 @@
     top: auto;
     left: 50%;
     transform: translateX(-50%);
-    width: 95%;
+    width: 35%;
     justify-content: center; 
     z-index: 1000;
     flex-wrap: wrap; 
