@@ -64,17 +64,20 @@
   }
 
   .view-toggle-container {
+    bottom: auto; 
+    top: 10px; 
+    
     left: 50%;
     transform: translateX(-50%);
-    bottom: max(16px, env(safe-area-inset-bottom)); 
-    width: 92%; 
+    width: 90%; 
     justify-content: center; 
+    z-index: 1000;
   }
 
   .view-toggle-btn {
-    flex: 1;
-    padding: 8px 2px;
-    font-size: 13px; 
+    flex: 1; 
+    padding: 6px 2px;
+    font-size: 12px;
     text-align: center;
     white-space: nowrap; 
   }

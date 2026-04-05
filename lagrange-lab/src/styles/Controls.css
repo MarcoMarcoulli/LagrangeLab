@@ -106,29 +106,35 @@
 
 @media (max-width: 768px) {
   .control-bar-container {
-    flex-direction: column; 
-    align-items: stretch;
-    gap: 10px;
-    padding: 12px;
-  }
-  
-  .buttons-row {
+    flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .instruction-label {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+    margin-bottom: 4px;
   }
 
   .sliders-wrapper {
-    width: 100%;
-    box-sizing: border-box;
+    width: auto; 
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
   }
 
   .sliders-wrapper input[type="range"],
   .control-group input[type="range"] {
-    width: 100%;
-    margin-top: 8px; 
+    width: 100px; 
+    margin-top: 0;
   }
-  
-  .instruction-label {
-    text-align: center;
+
+  .action-btn {
+    padding: 8px 12px;
+    font-size: 12px;
   }
 }
