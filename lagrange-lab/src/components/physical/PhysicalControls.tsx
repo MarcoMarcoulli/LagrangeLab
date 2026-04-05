@@ -29,7 +29,7 @@ export function ActiveSimulationButtons({
         onClick={onTogglePause}
         className={`action-btn ${isPaused ? 'btn-resume' : 'btn-pause'}`}
       >
-        {isPaused ? 'Riprendi' : 'Pausa'}
+        {isPaused ? 'Resume' : 'Pause'}
       </button>
       
       <button
@@ -42,7 +42,7 @@ export function ActiveSimulationButtons({
   );
 }
 
-// 4. SLIDER RAPPORTO MASSE
+// Mass ratio slider
 export function MassRatioControl({ 
   massRatio, onChange 
 }: { 
@@ -50,12 +50,11 @@ export function MassRatioControl({
 }) {
   return (
     <div className="sliders-wrapper">
-      <label className="slider-label" style={{ width: '120px' }}>
-        Rapporto Masse: <strong>{massRatio.toFixed(2)}</strong>
+      <label className="slider-label">
+        Mass Ratio: <strong>{massRatio.toFixed(2)}</strong>
       </label>
       
       <input
-        style={{ width: '200px' }}  
         type="range" min={SLIDER_MIN} max={SLIDER_MAX} step="1" 
         value={massRatioToSlider(massRatio)} 
         onChange={(e) => onChange(sliderToMassRatio(parseFloat(e.target.value)))}
@@ -71,12 +70,12 @@ export function GravityControl({
 }) {
   return (
     <div className="sliders-wrapper">
-      <label className="slider-label" style={{ width: '80px' }}>
-        Gravità: <strong>{gravity.toFixed(2)}</strong>
+      <label className="slider-label">
+        Gravity: <strong>{gravity.toFixed(2)}</strong>
       </label>
       
       <input
-        style={{ width: '100px', accentColor: '#ff4757' }}
+        style={{ accentColor: '#ff4757' }}
         type="range" min="0.1" max="30" step="0.1" 
         value={gravity} 
         onChange={(e) => onChange(parseFloat(e.target.value))}

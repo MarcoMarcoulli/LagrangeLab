@@ -152,7 +152,8 @@ export function buildSimulation(
   return{
     id: crypto.randomUUID(),
     pivot,
-    state: initialState,
+    state: new Float64Array(initialState),
+    initialState: new Float64Array(initialState),
     parameters: initialParams,
     newtonTrace: [],
     lagrangeTrace: [],
@@ -309,8 +310,9 @@ export function buildChaosSwarm(
 
     swarm.push({
       ...leader,
-      id: crypto.randomUUID(), // Ogni clone deve avere il suo ID unico
+      id: crypto.randomUUID(),
       state: newState,
+      initialState: new Float64Array(newState),
       color: uniqueColor,
       newtonTrace: [],
       poincarePoints: [],

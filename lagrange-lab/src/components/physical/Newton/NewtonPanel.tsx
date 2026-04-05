@@ -36,6 +36,7 @@ type NewtonPanelProps = {
   ) => void;
   togglePause: () => void;
   reset: () => void;
+  restart: () => void;
 };
 
 function NewtonPanel({
@@ -47,6 +48,7 @@ function NewtonPanel({
   addSimulation,
   togglePause,
   reset,
+  restart,
 }: NewtonPanelProps)
 {
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
@@ -59,21 +61,21 @@ function NewtonPanel({
 
   const pivot: Point = useMemo(() => ({
     x: canvasSize.width / 2,
-    y: canvasSize.height * 0.35,
+    y: canvasSize.height * 0.4,
   }), [canvasSize.width, canvasSize.height]);
 
   const instructionMessage = useMemo(() => {
     if (!mass1) {
       return isPaused
-        ? 'Simulazioni in pausa. Clicca per posizionare la prima massa.'
-        : 'Clicca per posizionare la prima massa.';
+        ? 'Simulations paused'
+        : 'Click to place the first mass';
     }
 
     if (!mass2) {
-      return 'Premi Play per aggiungere un pendolo semplice oppure posiziona la seconda massa.';
+      return 'Press Play to start a simple pendulum or click to place the second mass';
     }
 
-    return 'Premi Play per aggiungere il doppio pendolo.';
+    return 'Press Play to start the double pendulum';
   }, [mass1, mass2, isPaused]);
 
   const resetDraft = useCallback(() => {
@@ -177,6 +179,7 @@ function NewtonPanel({
         onPlay={handlePlay}
         onTogglePause={togglePause}
         onReset={handleReset}
+        onRestart={restart}
         gravity={gravity}
         onGravityChange={onGravityChange}
       />

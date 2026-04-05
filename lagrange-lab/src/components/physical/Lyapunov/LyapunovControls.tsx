@@ -9,6 +9,7 @@ type LyapunovControlsProps = {
   onPlayChaos: () => void;
   onTogglePause: () => void;
   onReset: () => void;
+  onRestart: () => void;
   massRatio: number;
   onMassRatioChange: (value: number) => void;
   showDoubleOptions: boolean;
@@ -30,6 +31,7 @@ export default function LyapunovControls({
   onPlayChaos,
   onTogglePause,
   onReset,
+  onRestart,
   massRatio,
   onMassRatioChange,
   showDoubleOptions,
@@ -42,20 +44,30 @@ export default function LyapunovControls({
 }: LyapunovControlsProps) {
   return (
     <ControlBarContainer>
-      <InstructionLabel text={instructionMessage} />
+      <div className="action-column">
+        {!hasSimulations && (
+          <InstructionLabel text={instructionMessage} />
+        )}
 
-      {/* BOTTONE PLAY CAOS */}
-      {canStartSimulation && !hasSimulations && (
-        <button className="action-btn btn-chaos" onClick={onPlayChaos}>
-          Scatena il Caos
-        </button>
-      )}
+        <div className="buttons-row">
+          {canStartSimulation && !hasSimulations && (
+            <button className="action-btn btn-chaos" onClick={onPlayChaos}>
+              Play
+            </button>
+          )}
 
-      {hasSimulations && (
-        <ActiveSimulationButtons isPaused={isPaused} onTogglePause={onTogglePause} onReset={onReset} />
-      )}
+          {hasSimulations && (
+            <>
+              <ActiveSimulationButtons isPaused={isPaused} onTogglePause={onTogglePause} onReset={onReset} />
+              <button onClick={onRestart} className="action-btn btn-restart">
+                Restart
+              </button>
+            </>
+          )}
+        </div>
+        
+      </div>
 
-      {/* SLIDER DELLO SCIAME */}
       {canStartSimulation && !hasSimulations && (
         <div className="sliders-wrapper">
           <div className="control-group">

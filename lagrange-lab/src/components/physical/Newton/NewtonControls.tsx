@@ -2,17 +2,27 @@ import { ControlBarContainer, InstructionLabel, ActiveSimulationButtons, MassRat
 import '../../../styles/Controls.css';
 
 type NewtonControlsProps = {
-  instructionMessage: string; canStartSimulation: boolean; hasSimulations: boolean;
-  isPaused: boolean; onPlay: () => void; onTogglePause: () => void; onReset: () => void;
-  massRatio: number; onMassRatioChange: (value: number) => void; showDoubleOptions: boolean;
-  gravity: number; 
+  instructionMessage: string;
+  canStartSimulation: boolean;
+  hasSimulations: boolean;
+  isPaused: boolean;
+  onPlay: () => void;
+  onTogglePause: () => void;
+  onReset: () => void;
+  onRestart: () => void;
+  massRatio: number;
+  onMassRatioChange: (value: number) => void;
+  showDoubleOptions: boolean;
+  gravity: number;
   onGravityChange: (value: number) => void;
 };
 
 export default function NewtonControls({
   instructionMessage, canStartSimulation, hasSimulations, isPaused,
-  onPlay, onTogglePause, onReset, massRatio, onMassRatioChange, showDoubleOptions, gravity, onGravityChange
+  onPlay, onTogglePause, onReset, onRestart, massRatio, onMassRatioChange, showDoubleOptions, gravity, onGravityChange
 }: NewtonControlsProps) {
+  const showGravitySlider = (!hasSimulations && !showDoubleOptions) || (hasSimulations && !canStartSimulation);
+  
   return (
     <ControlBarContainer>
       <InstructionLabel text={instructionMessage} />
@@ -27,14 +37,24 @@ export default function NewtonControls({
       )}
 
       {hasSimulations && (
+        <>
         <ActiveSimulationButtons isPaused={isPaused} onTogglePause={onTogglePause} onReset={onReset} />
+        <button 
+            onClick={onRestart} 
+            className="action-btn btn-restart"
+          >
+            Restart
+          </button>
+        </>
       )}
 
-      {showDoubleOptions && !hasSimulations && (
+      {showDoubleOptions && (
         <MassRatioControl massRatio={massRatio} onChange={onMassRatioChange} />
       )}
 
-      <GravityControl gravity={gravity} onChange={onGravityChange} />
+      {showGravitySlider && (
+        <GravityControl gravity={gravity} onChange={onGravityChange} />
+      )}
     </ControlBarContainer>
   );
 }

@@ -5,6 +5,7 @@ export type PendulumSimulationItem = {
   id: string;
   pivot: Point;
   state: PendulumState;
+  initialState: PendulumState;
   parameters: PendulumParameters;
   newtonTrace: Point[];
   lagrangeTrace: Point[];

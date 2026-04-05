@@ -32,6 +32,7 @@ type PhysicalPanelProps = {
   ) => void;
   togglePause: () => void;
   reset: () => void;
+  restart: () => void;
 };
 
 function PhysicalPanel({
@@ -44,12 +45,13 @@ function PhysicalPanel({
   addChaosSwarm,
   togglePause,
   reset,
+  restart,
 }: PhysicalPanelProps) {
   const [viewMode, setViewMode] = useState<PhysicalViewMode>('newton');
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Blocchiamo lo scroll nativo del browser sul canvas, come in AbstractPanel
+  // Block native browser scrolling on the canvas.
   useEffect(() => {
     const div = containerRef.current;
     if (!div) return;
@@ -65,18 +67,15 @@ function PhysicalPanel({
     };
   }, []);
 
-  // Gestore per il cambio scheda: resettiamo il canvas per avere un foglio pulito
   const handleTabChange = (mode: PhysicalViewMode) => {
     if (mode !== viewMode) {
-      reset(); // Cancella le simulazioni in corso per evitare sovrapposizioni strane
+      reset();
       setViewMode(mode);
     }
   };
 
   return (
     <div className="panel-container" ref={containerRef}>
-      
-      {/* 1. BARRA DELLE TAB (Pulita, senza stili inline d'emergenza) */}
       <div className="view-toggle-container" style={{right: 8}}>
         <button
           onClick={() => handleTabChange('newton')}
@@ -93,7 +92,6 @@ function PhysicalPanel({
         </button>
       </div>
 
-      {/* 2. I PANNELLI */}
       {viewMode === 'newton' && (
         <NewtonPanel
           simulations={simulations}
@@ -104,6 +102,7 @@ function PhysicalPanel({
           addSimulation={addSimulation}
           togglePause={togglePause}
           reset={reset}
+          restart={restart}
         />
       )}
 
@@ -117,6 +116,7 @@ function PhysicalPanel({
           addChaosSwarm={addChaosSwarm}
           togglePause={togglePause}
           reset={reset}
+          restart={restart}
         />
       )}
     </div>

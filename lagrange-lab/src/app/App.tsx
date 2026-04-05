@@ -19,6 +19,7 @@ function App()
     addChaosSwarm : internalAddChaosSwarm,
     togglePause,
     reset,
+    restart,
     } = usePendulumSimulation();
   
   const handleGravityChange = useCallback((newG: number) => {
@@ -53,6 +54,7 @@ function App()
     addChaosSwarm: handleAddChaosSwarm,    
     togglePause,
     reset,
+    restart,
     gravity,
     onGravityChange: handleGravityChange,
   };

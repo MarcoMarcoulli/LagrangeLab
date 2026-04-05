@@ -23,7 +23,6 @@ function AbstractPanel({ simulations }: AbstractPanelProps) {
     if (!div) return;
 
     const handleNativeWheel = (e: WheelEvent) => {
-      // Ferma lo scroll della pagina e lo zoom (Ctrl + Rotella)
       e.preventDefault(); 
     };
 

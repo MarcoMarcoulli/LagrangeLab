@@ -53,6 +53,22 @@ export function usePendulumSimulation() {
     }
   }, []);
 
+  const restart = useCallback(() => {
+    setSimulations(prev => prev.map(sim => ({
+      ...sim,
+      state: new Float64Array(sim.initialState),
+      newtonTrace: [],
+      lyapunovTrace: [],
+      hamiltonTrace: [],
+      hamiltonTrace2: sim.hamiltonTrace2 ? [] : undefined,
+      jacobiTrace: [],
+      poincarePoints: [],
+      poincarePoints2: [],
+    })));
+    
+    setIsPaused(false);
+  }, []);
+
   const togglePause = useCallback(() => {
     setIsPaused(prev => !prev);
   }, []);
@@ -94,5 +110,6 @@ export function usePendulumSimulation() {
     addChaosSwarm,
     togglePause,
     reset,
+    restart,
   };
 }

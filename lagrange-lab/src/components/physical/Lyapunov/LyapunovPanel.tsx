@@ -8,7 +8,6 @@ import type { Point } from '../../../types/Geometry';
 import { useCanvasViewport } from '../../../hooks/useCanvasViewport';
 import { drawMass, drawPivot, drawRod } from '../../../utils/Draw/DrawUtils';
 
-// Importiamo i renderer dal nuovo file unificato
 import { 
   renderSimplePendulumScene, 
   renderDoublePendulumScene 
@@ -36,6 +35,7 @@ type LyapunovPanelProps = {
   ) => void;
   togglePause: () => void;
   reset: () => void;
+  restart: () => void;
 };
 
 export default function LyapunovPanel({
@@ -47,6 +47,7 @@ export default function LyapunovPanel({
   addChaosSwarm,
   togglePause,
   reset,
+  restart,
 }: LyapunovPanelProps) {
   
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
@@ -66,15 +67,16 @@ export default function LyapunovPanel({
   }), [canvasSize.width, canvasSize.height]);
 
   const instructionMessage = useMemo(() => {
-    if (!mass1) {
+    if (!mass1)
+    {
       return isPaused
-        ? 'Simulazioni in pausa. Clicca per la massa leader.'
-        : 'Clicca per posizionare la prima massa del pendolo leader.';
+        ? 'Simulations paused'
+        : 'Click to place the first mass';
     }
     if (!mass2) {
-      return 'Clicca per la seconda massa o imposta lo sciame.';
+      return 'Click to place the second mass or set the swarm of pendulums';
     }
-    return 'Premi "Scatena il Caos" per generare i cloni.';
+    return 'Press Play to start the swarm of pendulums.';
   }, [mass1, mass2, isPaused]);
 
   const resetDraft = useCallback(() => {
@@ -99,21 +101,23 @@ export default function LyapunovPanel({
 
     drawPivot(ctx, pivot);
 
-    // 1. RENDERING DELLO SCIAME ATTIVO (Fisica in corso)
     if (simulations.length > 0) {
-      // Disegniamo prima i cloni (dal secondo in poi)
-      for (let i = 1; i < simulations.length; i++) {
+      for (let i = 1; i < simulations.length; i++)
+      {
         const sim = simulations[i];
-        if (isDoubleState(sim.state)) {
+        if (isDoubleState(sim.state))
+        {
           const m1 = computeMass1Position(pivot, sim.state, sim.parameters);
           const m2 = computeMass2Position(pivot, sim.state, sim.parameters);
           renderDoublePendulumScene(ctx, pivot, m1, m2, sim.newtonTrace, sim.parameters.massRatio ?? 1, sim.color);
-        } else {
+        }
+        else
+        {
           const mPos = computeMass1Position(pivot, sim.state, sim.parameters);
           renderSimplePendulumScene(ctx, pivot, mPos, sim.newtonTrace, sim.color);
         }
       }
-      // Disegniamo il Leader per ULTIMO (sopra a tutti)
+
       const leader = simulations[0];
       if (isDoubleState(leader.state)) {
         const m1 = computeMass1Position(pivot, leader.state, leader.parameters);
@@ -125,15 +129,14 @@ export default function LyapunovPanel({
       }
     }
 
-    // 2. ANTEPRIMA DINAMICA (Mentre posizioni le masse)
     if (mass1 && !hasSimulations) {
       const dx1 = mass1.x - pivot.x;
       const dy1 = mass1.y - pivot.y;
       const L1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
       const baseTheta1 = Math.atan2(dx1, dy1);
 
-      // A. Disegna i Cloni (Sotto)
-      for (let i = 1; i < swarmSize; i++) {
+      for (let i = 1; i < swarmSize; i++)
+      {
         const pTheta1 = (!mass2) ? baseTheta1 + (i * delta) : baseTheta1;
         const pMass1 = { x: pivot.x + L1 * Math.sin(pTheta1), y: pivot.y + L1 * Math.cos(pTheta1) };
         const previewColor = `hsl(${(i * 137.5) % 360}, 70%, 60%)`;
@@ -141,7 +144,8 @@ export default function LyapunovPanel({
         drawRod(ctx, pivot, pMass1, previewColor);
         drawMass(ctx, pMass1, previewColor, true);
 
-        if (mass2) {
+        if (mass2)
+        {
           const dx2 = mass2.x - mass1.x;
           const dy2 = mass2.y - mass1.y;
           const L2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
@@ -152,12 +156,12 @@ export default function LyapunovPanel({
         }
       }
 
-      // B. Disegna il Leader (Sopra)
       const lM1 = { x: pivot.x + L1 * Math.sin(baseTheta1), y: pivot.y + L1 * Math.cos(baseTheta1) };
       drawRod(ctx, pivot, lM1, draftColor);
       drawMass(ctx, lM1, draftColor, true);
 
-      if (mass2) {
+      if (mass2)
+      {
         const dx2 = mass2.x - mass1.x;
         const dy2 = mass2.y - mass1.y;
         const L2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
@@ -205,6 +209,7 @@ export default function LyapunovPanel({
         onPlayChaos={handlePlayChaos}
         onTogglePause={togglePause}
         onReset={handleReset}
+        onRestart={restart}
         gravity={gravity}           
         onGravityChange={onGravityChange}
       />
