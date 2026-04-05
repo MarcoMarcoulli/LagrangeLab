@@ -18,7 +18,7 @@ type JacobiPanelProps = {
 
 function JacobiPanel({ simulations }: JacobiPanelProps)
 {
-  const [traceLength, setTraceLength] = useState(50);
+  const [traceLength, setTraceLength] = useState(15);
 
   // filter only double pendulums
   const doublePendulumSims = simulations.filter(sim => isDoubleState(sim.state));
@@ -57,7 +57,6 @@ function JacobiPanel({ simulations }: JacobiPanelProps)
           key={activeSim ? activeSim.id : 'empty'} 
           parameters={activeSim ? activeSim.parameters : null} 
           totalEnergy={totalEnergy}
-
           useColorfulMapStyle={useColorfulMapStyle}
         />
         <TorusAxes />

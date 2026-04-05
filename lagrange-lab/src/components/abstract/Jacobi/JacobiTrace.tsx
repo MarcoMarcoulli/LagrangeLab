@@ -12,6 +12,8 @@ type JacobiTraceProps = {
 export function JacobiTrace({ fullTrace, visibleLimit, color }: JacobiTraceProps) {
   
   const points3D = useMemo(() => {
+    if (visibleLimit <= 0 || fullTrace.length < 2) return [];
+    
     const trail = visibleLimit === 0 ? [] : fullTrace.slice(-visibleLimit);
     if (trail.length < 2) return [];
     

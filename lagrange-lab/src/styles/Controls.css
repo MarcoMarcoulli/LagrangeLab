@@ -104,7 +104,7 @@
 
 .sliders-wrapper input[type="range"],
 .control-group input[type="range"] {
-  width: 105px;
+  width: 120px;
   margin: 0;
   cursor: pointer;
 }

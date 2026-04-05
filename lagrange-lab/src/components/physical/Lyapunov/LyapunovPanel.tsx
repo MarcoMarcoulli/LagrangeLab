@@ -17,7 +17,6 @@ import { computeMass1Position } from '../../../simulation/models/PendulumCommon'
 import { computeMass2Position } from '../../../simulation/models/DoublePendulum';
 import { isDoubleState } from '../../../utils/TypeGuards';
 import { generateColor } from '../../../utils/Draw/ColorUtils';
-import { FRAME_DT } from '../../../simulation/PendulumSimulationEngine';
 
 type LyapunovPanelProps = {
   simulations: PendulumSimulationItem[];
@@ -56,8 +55,7 @@ export default function LyapunovPanel({
   const [mass2, setMass2] = useState<Point | null>(null);
   const [massRatio, setMassRatio] = useState(1);
   const [draftColor, setDraftColor] = useState<string>(() => generateColor());
-  const [traceLength, setTraceLength] = useState(2.4);
-  const pointsToKeep = Math.floor(traceLength / FRAME_DT);
+  const [traceLength, setTraceLength] = useState(15);
 
   const [swarmSize, setSwarmSize] = useState(10);
   const [delta, setDelta] = useState(0.0001);
@@ -66,7 +64,7 @@ export default function LyapunovPanel({
 
   const pivot: Point = useMemo(() => ({
     x: canvasSize.width / 2,
-    y: canvasSize.height * 0.35,
+    y: canvasSize.height * 0.4,
   }), [canvasSize.width, canvasSize.height]);
 
   const instructionMessage = useMemo(() => {
@@ -77,7 +75,7 @@ export default function LyapunovPanel({
         : 'Click to place the first mass';
     }
     if (!mass2) {
-      return 'Click to place the second mass or set the swarm of pendulums';
+      return 'Click to place the second mass or start simulation';
     }
     return 'Press Play to start the swarm of pendulums.';
   }, [mass1, mass2, isPaused]);
@@ -112,24 +110,23 @@ export default function LyapunovPanel({
         {
           const m1 = computeMass1Position(pivot, sim.state, sim.parameters);
           const m2 = computeMass2Position(pivot, sim.state, sim.parameters);
-          renderDoublePendulumScene(ctx, pivot, m1, m2, sim.newtonTrace, sim.parameters.massRatio ?? 1, sim.color);
+          renderDoublePendulumScene(ctx, pivot, m1, m2, sim.newtonTrace, sim.parameters.massRatio ?? 1, sim.color, traceLength);
         }
         else
         {
           const mPos = computeMass1Position(pivot, sim.state, sim.parameters);
-          renderSimplePendulumScene(ctx, pivot, mPos, sim.newtonTrace, sim.color);
+          renderSimplePendulumScene(ctx, pivot, mPos, sim.newtonTrace, sim.color, traceLength);
         }
       }
 
       const leader = simulations[0];
-      const leaderSlicedTrace = pointsToKeep === 0 ? [] : leader.newtonTrace.slice(-pointsToKeep);
       if (isDoubleState(leader.state)) {
         const m1 = computeMass1Position(pivot, leader.state, leader.parameters);
         const m2 = computeMass2Position(pivot, leader.state, leader.parameters);
-        renderDoublePendulumScene(ctx, pivot, m1, m2, leaderSlicedTrace, leader.parameters.massRatio ?? 1, leader.color);
+        renderDoublePendulumScene(ctx, pivot, m1, m2, leader.newtonTrace, leader.parameters.massRatio ?? 1, leader.color, traceLength);
       } else {
         const mPos = computeMass1Position(pivot, leader.state, leader.parameters);
-        renderSimplePendulumScene(ctx, pivot, mPos, leaderSlicedTrace, leader.color);
+        renderSimplePendulumScene(ctx, pivot, mPos, leader.newtonTrace, leader.color, traceLength);
       }
     }
 
@@ -177,7 +174,7 @@ export default function LyapunovPanel({
     }
 
     ctx.restore();
-  }, [simulations, pivot, mass1, mass2, massRatio, draftColor, viewport, hasSimulations, swarmSize, delta]);
+  }, [simulations, pivot, mass1, mass2, massRatio, draftColor, viewport, hasSimulations, swarmSize, delta, traceLength]);
 
   const handlePlayChaos = useCallback(() => {
     if (!mass1) return;

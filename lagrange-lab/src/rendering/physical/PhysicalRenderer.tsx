@@ -5,18 +5,18 @@ import { drawRod, drawMass } from '../../utils/Draw/DrawUtils';
  * Helper interno per disegnare la scia (Trace)
  * Evita di duplicare il codice della scia in ogni renderer
  */
-function drawTrace(ctx: CanvasRenderingContext2D, trace: Point[], color: string): void {
-  if (trace.length < 2) return;
+function drawTrace(ctx: CanvasRenderingContext2D, trace: Point[], color: string, pointsToDraw: number): void {
+  if (pointsToDraw <= 0 || trace.length < 2) return;
+  const start = Math.max(0, trace.length - pointsToDraw);
 
   ctx.beginPath();
-  // Usiamo rgba per supportare l'opacità della scia
   ctx.strokeStyle = color; 
-  ctx.lineWidth = 1.5;
-  ctx.lineJoin = 'round';
+  ctx.lineWidth = 1.2;
+  ctx.lineJoin = 'bevel';
   ctx.lineCap = 'round';
 
-  ctx.moveTo(trace[0].x, trace[0].y);
-  for (let i = 1; i < trace.length; i++) {
+  ctx.moveTo(trace[start].x, trace[start].y);
+  for (let i = start + 1; i < trace.length; i++) {
     ctx.lineTo(trace[i].x, trace[i].y);
   }
   ctx.stroke();
@@ -28,13 +28,14 @@ export function renderDoublePendulumScene(
   pivot: Point,
   m1: Point,
   m2: Point,
-  trace: Point[],
+  fullTrace: Point[],
   massRatio: number,
   color: string,
-  opacity: number = 1.0 // Default a 1 per Newton
+  traceLimit: number = 30,
+  opacity: number = 1.0
 ): void {
   // 1. Disegna la scia per prima (sta sotto al pendolo)
-  drawTrace(ctx, trace, color); // Scia un po' più chiara del pendolo
+  drawTrace(ctx, fullTrace, color, traceLimit);
 
   // 2. Imposta l'opacità per i componenti fisici
   ctx.globalAlpha = opacity;
@@ -52,11 +53,12 @@ export function renderSimplePendulumScene(
   ctx: CanvasRenderingContext2D,
   pivot: Point,
   m1: Point,
-  trace: Point[],
+  fullTrace: Point[],
   color: string,
+  traceLimit: number = 100,
   opacity: number = 1.0
 ): void {
-  drawTrace(ctx, trace, color);
+  drawTrace(ctx, fullTrace, color, traceLimit);
 
   ctx.globalAlpha = opacity;
   drawRod(ctx, pivot, m1, color);

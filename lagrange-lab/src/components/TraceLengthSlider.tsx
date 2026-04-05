@@ -10,7 +10,7 @@ type TraceLengthSliderProps = {
 export default function TraceLengthSlider({ 
   value,
   onChange,
-  max = 100,
+  max = 30,
   style
 }: TraceLengthSliderProps) {
   const percentage = Math.round((value / max) * 100);

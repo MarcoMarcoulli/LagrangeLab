@@ -57,11 +57,12 @@ function HamiltonPanel({ simulations }: HamiltonPanelProps)
           ctx,
           width,
           height,
-          traceLength === 0 ? [] : sim.hamiltonTrace.slice(-traceLength),
+          sim.hamiltonTrace,
           currentPhasePoint,
           sim.color,
           omegaMax,
-          false
+          false,
+          traceLength
         );
 
         if (isDoubleState(sim.state) && sim.hamiltonTrace2) {
@@ -73,11 +74,12 @@ function HamiltonPanel({ simulations }: HamiltonPanelProps)
             ctx,
             width,
             height,
-            traceLength === 0 ? [] : sim.hamiltonTrace2.slice(-traceLength),
+            sim.hamiltonTrace2,
             currentPhasePoint2,
             sim.color,
             omegaMax,
-            true 
+            true,
+            traceLength
           );
         }
       }
@@ -91,6 +93,7 @@ function HamiltonPanel({ simulations }: HamiltonPanelProps)
         value={traceLength} 
         onChange={setTraceLength} 
         style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}
+        max={100}
       />
       <CanvasPanel onDraw={drawScene} />
       <img

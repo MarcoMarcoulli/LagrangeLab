@@ -104,7 +104,8 @@ export default function LyapunovControls({
       )}
 
       <GravityControl gravity={gravity} onChange={onGravityChange} />
-      {!(hasSimulations && canStartSimulation) &&<TraceLengthSlider
+      
+      {hasSimulations &&<TraceLengthSlider
         value={traceLength}
         onChange={onTraceLengthChange}
         style={{ display: 'flex', alignItems: 'center' }}

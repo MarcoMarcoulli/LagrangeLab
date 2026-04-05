@@ -56,7 +56,7 @@ function NewtonPanel({
   const [mass2, setMass2] = useState<Point | null>(null);
   const [massRatio, setMassRatio] = useState(1);
   const [draftColor, setDraftColor] = useState<string>(() => generateColor());
-  const [traceLength, setTraceLength] = useState(50);
+  const [traceLength, setTraceLength] = useState(15);
 
   const { viewport, handleWheel, screenToWorld } = useCanvasViewport();
 
@@ -110,7 +110,6 @@ function NewtonPanel({
     for (const simulation of simulations)
     {
       const { state, parameters, newtonTrace, color } = simulation;
-      const slicedTrace = traceLength === 0 ? [] : newtonTrace.slice(-traceLength);
 
       if (isDoubleState(state)) 
       {
@@ -121,15 +120,16 @@ function NewtonPanel({
           pivot,
           m1,
           m2,
-          slicedTrace,
+          newtonTrace,
           parameters.massRatio ?? 1,
-          color
+          color,
+          traceLength
         );
       }
       else
       {
         const mPos = computeMass1Position(pivot, state, parameters);
-        renderSimplePendulumScene(ctx, pivot, mPos, newtonTrace.slice(-traceLength), color);
+        renderSimplePendulumScene(ctx, pivot, mPos, newtonTrace, color, traceLength);
       }
     }
 

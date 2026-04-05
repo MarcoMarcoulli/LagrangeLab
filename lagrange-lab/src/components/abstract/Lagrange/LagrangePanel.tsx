@@ -25,7 +25,7 @@ type LagrangePanelProps = {
 
 function LagrangePanel({ simulations }: LagrangePanelProps) {
 
-  const [traceLength, setTraceLength] = useState(50);
+  const [traceLength, setTraceLength] = useState(30);
 
   const doublePendulumSimulations = simulations.filter(sim => isDoubleState(sim.state));
 
@@ -73,9 +73,10 @@ function LagrangePanel({ simulations }: LagrangePanelProps) {
           ctx,
           width,
           height,
-          traceLength === 0 ? [] : sim.lagrangeTrace.slice(-traceLength),
+          sim.lagrangeTrace,
           currentConfigurationPoint,
-          sim.color
+          sim.color,
+          traceLength
         );
       }
     },
@@ -88,6 +89,7 @@ function LagrangePanel({ simulations }: LagrangePanelProps) {
         value={traceLength} 
         onChange={setTraceLength} 
         style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}
+        max = {60}
       />
       <CanvasPanel onDraw={drawScene} />
 

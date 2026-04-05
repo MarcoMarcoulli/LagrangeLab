@@ -55,8 +55,6 @@ function PoincarePanel({ simulations }: PoincarePanelProps) {
 
         const pointsToDraw = viewMass === 2 ? sim.poincarePoints : sim.poincarePoints2;
 
-        // Assumiamo che il motore fisico accumuli i punti di intersezione in sim.poincarePoints
-        // (es. ogni volta che il primo pendolo passa per lo zero con velocità positiva)
         if (pointsToDraw && pointsToDraw.length > 0)
         {
           renderPoincareScene(
@@ -80,13 +78,13 @@ function PoincarePanel({ simulations }: PoincarePanelProps) {
           onClick={() => setViewMass(1)}
           style={{ padding: '5px 10px', cursor: 'pointer', background: viewMass === 1 ? '#007bff' : '#333', color: 'white', border: 'none', borderRadius: '4px' }}
         >
-          Massa 1
+          Mass 1
         </button>
         <button 
           onClick={() => setViewMass(2)}
           style={{ padding: '5px 10px', cursor: 'pointer', background: viewMass === 2 ? '#007bff' : '#333', color: 'white', border: 'none', borderRadius: '4px' }}
         >
-          Massa 2
+          Mass 2
         </button>
       </div>
       <CanvasPanel onDraw={drawScene} />

@@ -56,24 +56,27 @@ export function renderLagrangeScene(
   height: number,
   lagrangeTrace: Point[],
   currentConfigurationPoint: Point,
-  color: string
+  color: string,
+  traceLimit: number = 30
 ): void {
-  if (lagrangeTrace.length > 1) {
+  const start = Math.max(0, lagrangeTrace.length - traceLimit);
+  if (traceLimit > 0 && lagrangeTrace.length > 1) {
     ctx.beginPath();
     ctx.strokeStyle = color;
     ctx.lineWidth = 1.5;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
-    const first = mapConfigurationToCanvas(
-      wrapAngle(lagrangeTrace[0].x),
-      wrapAngle(lagrangeTrace[0].y),
+    const firstPoint = lagrangeTrace[start];
+    const firstMapped = mapConfigurationToCanvas(
+      wrapAngle(firstPoint.x),
+      wrapAngle(firstPoint.y),
       width,
       height
     );
-    ctx.moveTo(first.x, first.y);
+    ctx.moveTo(firstMapped.x, firstMapped.y);
 
-    for (let i = 1; i < lagrangeTrace.length; i++)
+    for (let i = start + 1; i < lagrangeTrace.length; i++)
     {
         const prev = lagrangeTrace[i - 1];
         const curr = lagrangeTrace[i];

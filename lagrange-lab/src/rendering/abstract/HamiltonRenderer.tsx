@@ -57,25 +57,27 @@ export function renderHamiltonScene(
   currentPhasePoint: Point,
   color: string,
   omegaMax: number,
-  isMass2: boolean = false
+  isMass2: boolean = false,
+  traceLimit: number = 30
 ): void {
-  if (hamiltonTrace.length > 1) {
+  const start = Math.max(0, hamiltonTrace.length - traceLimit);
+  if (traceLimit > 0 && hamiltonTrace.length > 1) {
     ctx.beginPath();
     ctx.strokeStyle = color;
     ctx.lineWidth = isMass2 ? 2 : 1;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
-    let prevPoint = mapPhaseToCanvas(
-      wrapAngle(hamiltonTrace[0].x),
-      hamiltonTrace[0].y,
+    let prevMapped = mapPhaseToCanvas(
+      wrapAngle(hamiltonTrace[start].x),
+      hamiltonTrace[start].y,
       width,
       height,
       omegaMax
     );
-    ctx.moveTo(prevPoint.x, prevPoint.y);
+    ctx.moveTo(prevMapped.x, prevMapped.y);
 
-    for (let i = 1; i < hamiltonTrace.length; i++) {
+    for (let i = start + 1; i < hamiltonTrace.length; i++) {
       const p = mapPhaseToCanvas(
         wrapAngle(hamiltonTrace[i].x),
         hamiltonTrace[i].y,
@@ -84,13 +86,13 @@ export function renderHamiltonScene(
         omegaMax
       );
 
-      if (Math.abs(p.x - prevPoint.x) > width / 2) {
+      if (Math.abs(p.x - prevMapped.x) > width / 2) {
         ctx.moveTo(p.x, p.y);
       } else {
         ctx.lineTo(p.x, p.y);
       }
       
-      prevPoint = p;
+      prevMapped = p;
     }
 
     ctx.stroke();
