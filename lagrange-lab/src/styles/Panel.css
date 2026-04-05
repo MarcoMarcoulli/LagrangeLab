@@ -58,32 +58,30 @@
   user-select: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 800px) {
   .physicist-image {
     display: none;
   }
-
   .view-toggle-container {
     bottom: 12px;
     top: auto;
     left: 50%;
     transform: translateX(-50%);
-    width: 50%; 
+    width: 95%;
     justify-content: center; 
     z-index: 1000;
+    flex-wrap: wrap; 
   }
-
   .right-panel .view-toggle-container {
     bottom: auto;
     top: 10px;
-    left: 20%;
   }
 
   .view-toggle-btn {
-    flex: 1; 
-    padding: 6px 2px;
-    font-size: 12px;
+    flex: 1 1 45%;
+    padding: 8px 2px;
+    font-size: 13px;
     text-align: center;
-    white-space: nowrap; 
+    white-space: normal;
   }
 }
