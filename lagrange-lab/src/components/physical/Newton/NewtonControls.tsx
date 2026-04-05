@@ -1,6 +1,7 @@
 import { ControlBarContainer, InstructionLabel, PauseResumeButton, ResetButton, RestartButton, MassRatioControl, GravityControl } from '../PhysicalControls';
 import '../../../styles/Controls.css';
 import TraceLengthSlider from '../../TraceLengthSlider';
+import { TRACE_POINTS_NEWTON } from '../../../simulation/PendulumSimulationEngine';
 
 type NewtonControlsProps = {
   instructionMessage: string;
@@ -85,6 +86,7 @@ export default function NewtonControls({
           value={traceLength}
           onChange={onTraceLengthChange}
           style={{ display: 'flex', alignItems: 'center' }}
+          max = {TRACE_POINTS_NEWTON}
         />
       )}
     </ControlBarContainer>

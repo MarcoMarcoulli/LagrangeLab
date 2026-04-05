@@ -6,18 +6,24 @@ import { drawRod, drawMass } from '../../utils/Draw/DrawUtils';
  * Evita di duplicare il codice della scia in ogni renderer
  */
 function drawTrace(ctx: CanvasRenderingContext2D, trace: Point[], color: string, pointsToDraw: number): void {
-  if (pointsToDraw <= 0 || trace.length < 2) return;
-  const start = Math.max(0, trace.length - pointsToDraw);
+  if (!Number.isFinite(pointsToDraw) || pointsToDraw <= 0 || trace.length < 2) return;
+  
+  const start = Math.floor(Math.max(0, trace.length - pointsToDraw));
+
+  if (!trace[start]) return;
 
   ctx.beginPath();
   ctx.strokeStyle = color; 
   ctx.lineWidth = 1.2;
-  ctx.lineJoin = 'bevel';
+  ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
 
   ctx.moveTo(trace[start].x, trace[start].y);
   for (let i = start + 1; i < trace.length; i++) {
-    ctx.lineTo(trace[i].x, trace[i].y);
+    if (trace[i])
+    {
+      ctx.lineTo(trace[i].x, trace[i].y);
+    }
   }
   ctx.stroke();
   ctx.globalAlpha = 1.0; // Reset

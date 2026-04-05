@@ -21,6 +21,8 @@ import { isDoubleState } from '../../../utils/TypeGuards';
 
 import { generateColor } from '../../../utils/Draw/ColorUtils';
 
+import { TRACE_POINTS_NEWTON } from '../../../simulation/PendulumSimulationEngine';
+
 type NewtonPanelProps = {
   simulations: PendulumSimulationItem[];
   hasSimulations: boolean;
@@ -56,7 +58,7 @@ function NewtonPanel({
   const [mass2, setMass2] = useState<Point | null>(null);
   const [massRatio, setMassRatio] = useState(1);
   const [draftColor, setDraftColor] = useState<string>(() => generateColor());
-  const [traceLength, setTraceLength] = useState(15);
+  const [traceLength, setTraceLength] = useState(TRACE_POINTS_NEWTON / 2);
 
   const { viewport, handleWheel, screenToWorld } = useCanvasViewport();
 

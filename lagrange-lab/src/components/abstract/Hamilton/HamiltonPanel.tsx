@@ -8,6 +8,7 @@ import {
   renderHamiltonScene,
 } from '../../../rendering/abstract/HamiltonRenderer';
 import TraceLengthSlider from '../../TraceLengthSlider';
+import { TRACE_POINTS_HAMILTON } from '../../../simulation/PendulumSimulationEngine';
 
 type HamiltonPanelProps = {
   simulations: PendulumSimulationItem[];
@@ -15,7 +16,7 @@ type HamiltonPanelProps = {
 
 function HamiltonPanel({ simulations }: HamiltonPanelProps)
 {
-  const [traceLength, setTraceLength] = useState(50);
+  const [traceLength, setTraceLength] = useState(TRACE_POINTS_HAMILTON / 2);
   const [omegaMax, setOmegaMax] = useState(40);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -93,7 +94,7 @@ function HamiltonPanel({ simulations }: HamiltonPanelProps)
         value={traceLength} 
         onChange={setTraceLength} 
         style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}
-        max={100}
+        max={TRACE_POINTS_HAMILTON}
       />
       <CanvasPanel onDraw={drawScene} />
       <img

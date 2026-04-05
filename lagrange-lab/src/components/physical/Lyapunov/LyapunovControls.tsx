@@ -1,6 +1,7 @@
 import { ControlBarContainer, InstructionLabel, PauseResumeButton, ResetButton, RestartButton, MassRatioControl, GravityControl } from '../PhysicalControls';
 import '../../../styles/Controls.css';
 import TraceLengthSlider from '../../TraceLengthSlider';
+import { TRACE_POINTS_LYAPUNOV } from '../../../simulation/PendulumSimulationEngine';
 
 type LyapunovControlsProps = {
   instructionMessage: string;
@@ -109,6 +110,7 @@ export default function LyapunovControls({
         value={traceLength}
         onChange={onTraceLengthChange}
         style={{ display: 'flex', alignItems: 'center' }}
+        max = {TRACE_POINTS_LYAPUNOV}
       />}
     </ControlBarContainer>
   );

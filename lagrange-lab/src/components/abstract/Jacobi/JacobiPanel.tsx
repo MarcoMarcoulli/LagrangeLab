@@ -11,6 +11,7 @@ import { JacobiTrace } from './JacobiTrace';
 
 import { computeDoublePendulumTotalEnergy } from '../../../simulation/models/DoublePendulum';
 import TraceLengthSlider from '../../TraceLengthSlider';
+import { TRACE_POINTS_JACOBI } from '../../../simulation/PendulumSimulationEngine';
 
 type JacobiPanelProps = {
   simulations: PendulumSimulationItem[];
@@ -18,7 +19,7 @@ type JacobiPanelProps = {
 
 function JacobiPanel({ simulations }: JacobiPanelProps)
 {
-  const [traceLength, setTraceLength] = useState(15);
+  const [traceLength, setTraceLength] = useState(TRACE_POINTS_JACOBI / 2);
 
   // filter only double pendulums
   const doublePendulumSims = simulations.filter(sim => isDoubleState(sim.state));
@@ -43,6 +44,7 @@ function JacobiPanel({ simulations }: JacobiPanelProps)
         value={traceLength} 
         onChange={setTraceLength} 
         style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }} 
+        max={TRACE_POINTS_JACOBI}
       />
       <Canvas camera={{ position: [2, -8, 6], fov: 45 }}>
 

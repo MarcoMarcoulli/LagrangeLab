@@ -18,6 +18,7 @@ import { buildContourLevels } from '../../../utils/ContourLevels';
 import { computeDoublePendulumTotalEnergy } from '../../../simulation/models/DoublePendulum';
 
 import TraceLengthSlider from '../../TraceLengthSlider';
+import { TRACE_POINTS_LAGRANGE } from '../../../simulation/PendulumSimulationEngine';
 
 type LagrangePanelProps = {
   simulations: PendulumSimulationItem[];
@@ -25,7 +26,7 @@ type LagrangePanelProps = {
 
 function LagrangePanel({ simulations }: LagrangePanelProps) {
 
-  const [traceLength, setTraceLength] = useState(30);
+  const [traceLength, setTraceLength] = useState(TRACE_POINTS_LAGRANGE / 2);
 
   const doublePendulumSimulations = simulations.filter(sim => isDoubleState(sim.state));
 
@@ -89,7 +90,7 @@ function LagrangePanel({ simulations }: LagrangePanelProps) {
         value={traceLength} 
         onChange={setTraceLength} 
         style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}
-        max = {60}
+        max = {TRACE_POINTS_LAGRANGE}
       />
       <CanvasPanel onDraw={drawScene} />
 
